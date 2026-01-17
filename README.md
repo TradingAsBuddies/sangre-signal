@@ -147,6 +147,46 @@ python -m super_signal -t AAPL -f claude
 python -m super_signal -t AAPL -f claude -L es
 ```
 
+## Cache and Rate Limiting
+
+The tool includes built-in protections against Yahoo Finance rate limiting:
+
+### Persistent Cache
+
+Stock data is cached locally to minimize API requests:
+
+- **Location:** `~/.cache/sangre-signal/stock_cache.db`
+- **TTL:** 4 hours (stock data doesn't change frequently)
+- **Persists across sessions** - previously fetched tickers load instantly
+
+### Rate Limit Status
+
+Check your current rate limit usage:
+
+```bash
+python -m super_signal --status
+```
+
+Example output:
+```
+=== Rate Limit Status ===
+Requests made (last hour): 12/80
+Requests remaining: 68
+Status: OK
+
+=== Cache Info ===
+Cache location: /home/user/.cache/sangre-signal/stock_cache.db
+Cache TTL: 4.0 hours
+```
+
+### Clear Cache
+
+If you need fresh data or want to reset the cache:
+
+```bash
+python -m super_signal --clear-cache
+```
+
 ## Risk Factors Detected
 
 The screener analyzes stocks for the following risk factors:
@@ -192,9 +232,10 @@ sangre-signal/
 │   ├── main.py               # CLI argument parsing
 │   ├── cli.py                # Command-line interface
 │   ├── config.py             # Configuration (loads .env)
+│   ├── cache.py              # Persistent cache & rate limiting
 │   ├── models.py             # Data classes
 │   ├── fetchers/
-│   │   ├── yahoo_finance.py  # Yahoo Finance API
+│   │   ├── yahoo_finance.py  # Yahoo Finance API (with retry logic)
 │   │   └── finviz.py         # FinViz scraping
 │   ├── analyzers/
 │   │   └── risk_analyzer.py  # Risk detection
@@ -237,6 +278,21 @@ If you see "AI analysis unavailable - ANTHROPIC_API_KEY not set":
 - Verify the ticker symbol is correct
 - Check your internet connection
 - Yahoo Finance may be temporarily unavailable
+
+### Rate Limited by Yahoo Finance (429 Error)
+
+If you see "429 Too Many Requests" errors:
+
+1. **Wait 15-60 minutes** - Yahoo Finance rate limits typically expire within an hour
+2. **Check status**: `python -m super_signal --status`
+3. **Use cached data** - Previously fetched tickers are cached for 4 hours
+4. **Reduce batch sizes** - Analyze fewer stocks at once
+
+The tool automatically:
+- Limits requests to 80/hour
+- Adds delays between requests
+- Retries with exponential backoff
+- Caches results to avoid repeat requests
 
 ## License
 
