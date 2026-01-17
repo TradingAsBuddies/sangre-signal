@@ -9,7 +9,16 @@ import os
 import sys
 from enum import Enum
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import List, Literal
+
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+# Searches current directory and parent directories
+_env_path = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(_env_path)
+load_dotenv()  # Also try current working directory
 
 
 # --- Risk Detection Configuration ---
@@ -53,62 +62,42 @@ class ANSIColor(Enum):
 
     These codes enable colored text output in terminal applications.
     """
-    RESET = "\033[0m"
-    BOLD = "\033[1m"
-    UNDERLINE = "\033[4m"
-    NEGATIVE = "\033[7m"  # Inverted colors
+    RESET = "[0m"
+    BOLD = "[1m"
+    UNDERLINE = "[4m"
+    NEGATIVE = "[7m"  # Inverted colors
 
     # Standard colors
-    RED = "\033[31m"
-    YELLOW = "\033[33m"
-    CYAN = "\033[36m"
-    WHITE = "\033[97m"
+    RED = "[31m"
+    YELLOW = "[33m"
+    CYAN = "[36m"
+    WHITE = "[97m"
 
     # Bright/bold colors
-    BOLD_CYAN = "\033[1;36m"
-    LIGHT_GREEN = "\033[1;32m"
-    BRIGHT_BLUE = "\033[94m"
+    BOLD_CYAN = "[1;36m"
+    LIGHT_GREEN = "[1;32m"
+    BRIGHT_BLUE = "[94m"
 
     # Background colors
-    BG_BRIGHT_RED = "\033[101m"
+    BG_BRIGHT_RED = "[101m"
 
 
 # --- Display Configuration ---
 
 def _get_safe_horizontal_line() -> str:
-    """Get a horizontal line character safe for the terminal encoding.
-
-    Returns Unicode box-drawing character if the terminal supports it,
-    otherwise returns ASCII hyphen as fallback.
-
-    Returns:
-        Horizontal line character (either "-" or "-")
-    """
+    """Get a horizontal line character safe for the terminal encoding."""
     try:
-        # Check if stdout encoding supports Unicode
-        encoding = sys.stdout.encoding or 'ascii'
-
-        # Try to encode the Unicode box-drawing character
+        encoding = sys.stdout.encoding or "ascii"
         test_char = "-"
         test_char.encode(encoding)
-
         return test_char
     except (UnicodeEncodeError, LookupError, AttributeError):
-        # Fallback to ASCII hyphen if Unicode isn't supported
         return "-"
 
 
 @dataclass
 class DisplayConfig:
-    """Display formatting configuration.
-
-    Attributes:
-        summary_width: Width of the summary display box
-        label_width: Width of field labels
-        max_field_width: Maximum width for field values before wrapping
-        horizontal_line: Character used for horizontal lines
-        directors_max_count: Maximum number of directors to display
-    """
+    """Display formatting configuration."""
     summary_width: int = 70
     label_width: int = 20
     max_field_width: int = 40
@@ -116,11 +105,9 @@ class DisplayConfig:
     directors_max_count: int = 10
 
 
-# Default display configuration
 DISPLAY_CONFIG = DisplayConfig()
 
 
-# Field labels for stock summary display
 FIELD_LABELS = {
     "flag_risk": "FLAG RISK ----------- ",
     "company": "Company ------------- ",
@@ -157,15 +144,7 @@ FIELD_LABELS = {
 
 @dataclass
 class LoggingConfig:
-    """Logging configuration for the application.
-
-    Attributes:
-        log_file: Path to the log file
-        log_level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-        console_log_level: Logging level for console output
-        log_format: Format string for log messages
-        date_format: Format string for timestamps in log messages
-    """
+    """Logging configuration for the application."""
     log_file: str = "super_signal.log"
     log_level: int = logging.INFO
     console_log_level: int = logging.WARNING
@@ -173,34 +152,21 @@ class LoggingConfig:
     date_format: str = "%Y-%m-%d %H:%M:%S"
 
 
-# Default logging configuration
 LOGGING_CONFIG = LoggingConfig()
 
 
 def setup_logging(config: LoggingConfig = LOGGING_CONFIG) -> None:
-    """Set up logging configuration for the application.
-
-    Configures both file and console logging handlers with appropriate
-    log levels and formatting.
-
-    Args:
-        config: Logging configuration to use (defaults to LOGGING_CONFIG).
-    """
-    # Create logger
+    """Set up logging configuration for the application."""
     logger = logging.getLogger("super_signal")
     logger.setLevel(config.log_level)
-
-    # Remove existing handlers to avoid duplicates
     logger.handlers.clear()
 
-    # File handler - logs everything at log_level and above
     file_handler = logging.FileHandler(config.log_file)
     file_handler.setLevel(config.log_level)
     file_formatter = logging.Formatter(config.log_format, config.date_format)
     file_handler.setFormatter(file_formatter)
     logger.addHandler(file_handler)
 
-    # Console handler - only logs warnings and above
     console_handler = logging.StreamHandler()
     console_handler.setLevel(config.console_log_level)
     console_formatter = logging.Formatter("%(levelname)s: %(message)s")
@@ -212,17 +178,11 @@ def setup_logging(config: LoggingConfig = LOGGING_CONFIG) -> None:
 
 @dataclass
 class NetworkConfig:
-    """Network request configuration.
-
-    Attributes:
-        user_agent: User agent string for HTTP requests
-        request_timeout: Timeout in seconds for HTTP requests
-    """
+    """Network request configuration."""
     user_agent: str = "Mozilla/5.0 (compatible; stock-inspector/1.0)"
     request_timeout: int = 10
 
 
-# Default network configuration
 NETWORK_CONFIG = NetworkConfig()
 
 
@@ -233,10 +193,10 @@ class ClaudeConfig:
     """Claude AI integration configuration.
 
     Attributes:
-        api_key: Anthropic API key (loaded from ANTHROPIC_API_KEY env var)
+        api_key: Anthropic API key (loaded from ANTHROPIC_API_KEY env var or .env file)
         model: Claude model to use for analysis
         max_tokens: Maximum tokens for response
-        language: Output language ('en' for English, 'es' for Spanish)
+        language: Output language ("en" for English, "es" for Spanish)
     """
     api_key: str = field(default_factory=lambda: os.environ.get("ANTHROPIC_API_KEY", ""))
     model: str = "claude-sonnet-4-20250514"
@@ -244,13 +204,8 @@ class ClaudeConfig:
     language: Literal["en", "es"] = "en"
 
     def is_configured(self) -> bool:
-        """Check if Claude API is properly configured.
-
-        Returns:
-            True if API key is set, False otherwise.
-        """
+        """Check if Claude API is properly configured."""
         return bool(self.api_key)
 
 
-# Default Claude configuration
 CLAUDE_CONFIG = ClaudeConfig()
