@@ -1,333 +1,236 @@
-# Super Signal - Advanced Stock Analysis Tool
+# Sangre Signal - Advanced Stock Analysis Tool
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![PyPI version](https://badge.fury.io/py/super-signal.svg)](https://badge.fury.io/py/super-signal)
-[![COPR](https://copr.fedorainfracloud.org/coprs/tradingasbuddies/super-signal/package/super-signal/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/tradingasbuddies/super-signal/)
 
-A comprehensive stock analysis application that analyzes stocks for various risk factors including country of origin, ADR status, low float, and more.
+A comprehensive stock analysis application that analyzes stocks for various risk factors including country of origin, ADR status, low float, and more. Now with **Claude AI-powered analysis** for plain-language risk explanations in English and Spanish.
 
 ## Features
 
-- 📊 Real-time stock data from Yahoo Finance
-- 🚩 Multi-factor risk analysis (country, ADR status, float, headquarters)
-- 🎨 Colorful terminal output with ANSI colors
-- 📝 Automatic logging to file
-- 🔧 Modular, extensible architecture
-- 🖥️ Ready for future GUI development
+- Real-time stock data from Yahoo Finance
+- Multi-factor risk analysis (country, ADR status, float, headquarters)
+- **Claude AI-powered analysis** with plain-language risk explanations
+- **Bilingual support** - English and Spanish (Mexican) output
+- Portfolio-level analysis for multiple stocks
+- Multiple output formats: text, JSON, CSV, and Claude AI
+- Colorful terminal output with ANSI colors
+- Automatic logging to file
+- Modular, extensible architecture
 
 ## Installation
 
-### PyPI (All Platforms)
-
-**Easiest method - works on Windows, macOS, and Linux:**
+### From GitHub
 
 ```bash
-# Install from PyPI
-pip install super-signal
+# Clone the repository
+git clone https://github.com/TradingAsBuddies/sangre-signal.git
+cd sangre-signal
 
-# Run
-super-signal --ticker AAPL
-```
-
-### From GitHub (Latest Development Version)
-
-**Install directly from GitHub using pip:**
-
-```bash
-# Install latest from main branch
-pip install git+https://github.com/TradingAsBuddies/super-signal.git
-
-# Install a specific version/tag
-pip install git+https://github.com/TradingAsBuddies/super-signal.git@v2.5.0
-
-# Install a specific branch
-pip install git+https://github.com/TradingAsBuddies/super-signal.git@feature/branch-name
-```
-
-### Fedora / RHEL / CentOS (RPM)
-
-**Option 1: Install from COPR (Recommended)**
-
-```bash
-# Enable COPR repository
-sudo dnf copr enable tradingasbuddies/super-signal
-
-# Install
-sudo dnf install super-signal
-
-# Run
-super-signal --ticker AAPL
-```
-
-**Option 2: Build from Source**
-
-```bash
-# Build RPM (see RPM_PACKAGING.md for details)
-rpmbuild -ba super-signal.spec
-
-# Install the built RPM
-sudo dnf install ~/rpmbuild/RPMS/noarch/super-signal-2.0.0-1.*.noarch.rpm
-```
-
-See [RPM_PACKAGING.md](RPM_PACKAGING.md) for complete build instructions or [COPR_SETUP.md](COPR_SETUP.md) for publishing to COPR.
-
-### From Source (Development)
-
-**Windows:**
-
-```batch
-REM 1. Create virtual environment
+# Create virtual environment
 python -m venv venv
 
-REM 2. Activate virtual environment (WINDOWS)
+# Activate (Windows)
 venv\Scripts\activate
 
-REM 3. Install the package
-pip install .
-
-REM 4. Run the application
-super-signal
-```
-
-**Linux / macOS:**
-
-```bash
-# 1. Create virtual environment
-python3 -m venv venv
-
-# 2. Activate virtual environment (LINUX/MAC)
+# Activate (Linux/Mac)
 source venv/bin/activate
 
-# 3. Install the package
-pip install .
-
-# 4. Run the application
-super-signal
+# Install dependencies
+pip install -r requirements.txt
 ```
+
+### Configuration
+
+Copy the example environment file and add your Anthropic API key:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and add your API key:
+```
+ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
+```
+
+Get your API key at: https://console.anthropic.com/
 
 ## Quick Start
 
-After installation, you can run the stock screener in several ways:
-
-### Windows Users - Three Options:
-
-**Option 1: Direct path (always works)**
-```batch
-venv\Scripts\super-signal.exe --ticker AAPL
-```
-
-**Option 2: Python module syntax (recommended)**
-```batch
-python -m super_signal --ticker AAPL
-```
-
-**Option 3: Command name (if PATH is set)**
-```batch
-super-signal --ticker AAPL
-```
-*Note: If this doesn't work, deactivate and reactivate your venv, or use Option 1 or 2.*
-
-### Linux/Mac Users:
-
 ```bash
-super-signal --ticker AAPL
-# or
-python -m super_signal --ticker AAPL
-```
+# Basic stock analysis (text format)
+python -m super_signal -t AAPL
 
-### Interactive Mode (All Platforms)
-```bash
+# Multiple stocks
+python -m super_signal -t AAPL,TSLA,MSFT
+
+# Interactive mode
 python -m super_signal
 ```
-Enter ticker symbols one at a time. Press Enter without input to exit.
 
-### Windows Batch File
-Double-click `super-signal.bat` or run:
-```batch
-super-signal.bat
-```
+## Claude AI Analysis
 
-## Usage Examples
+The Claude AI format provides natural language explanations of stock risks that anyone can understand.
+
+### English Analysis
 
 ```bash
-# Interactive mode
-super-signal
+python -m super_signal -t AAPL -f claude
+```
 
-# Check a single stock
-super-signal --ticker TSLA
+### Spanish Analysis (Mexican Spanish)
 
-# Check multiple stocks at once
-super-signal -t AAPL -t GOOG -t MSFT
-super-signal -t AAPL,GOOG,MSFT
+```bash
+python -m super_signal -t AAPL -f claude -L es
+```
 
-# Output formats: text (default), json, csv
-super-signal -t AAPL,GOOG -f json
-super-signal -t AAPL,GOOG -f csv
+### Portfolio Analysis
 
-# Change log level
-super-signal --log-level DEBUG --ticker NVDA
+When analyzing multiple stocks with Claude, you get individual analyses plus a consolidated portfolio summary:
+
+```bash
+python -m super_signal -t AAPL,TSLA,BABA -f claude
+```
+
+This provides:
+- Individual risk analysis for each stock
+- Plain-language explanations of what each risk means
+- Actionable investment insights
+- Portfolio-level risk distribution summary
+- Common risk factors across holdings
+
+### Example Output
+
+```
+============================================================
+  AAPL ANALYSIS (Powered by Claude AI)
+============================================================
+
+# Apple Inc. (AAPL) Stock Analysis
+
+## Company Overview
+Apple Inc. is the world's largest technology company...
+
+## RISK ASSESSMENT: LOW RISK
+
+Apple presents a LOW RISK investment profile based on current
+market data. The company shows strong institutional backing,
+minimal short interest, and manageable debt levels...
+
+## KEY METRICS
+- Market Cap: $3.78 trillion
+- Current Price: $255.53
+- Institutional Ownership: 64.82%
+...
+
+## BOTTOM LINE
+Apple represents a low-risk investment opportunity for retail
+investors seeking exposure to a proven technology leader...
+============================================================
+```
+
+## Output Formats
+
+```bash
+# Text - colored terminal output (default)
+python -m super_signal -t AAPL -f text
+
+# JSON - machine-readable format
+python -m super_signal -t AAPL -f json
+
+# CSV - spreadsheet format
+python -m super_signal -t AAPL -f csv
+
+# Claude - AI-powered analysis
+python -m super_signal -t AAPL -f claude
+
+# Claude in Spanish
+python -m super_signal -t AAPL -f claude -L es
 ```
 
 ## Risk Factors Detected
 
 The screener analyzes stocks for the following risk factors:
 
-- ⚠️ **Non-US Country of Origin** - Companies headquartered outside the US
-- ⚠️ **High-Risk Countries** - RU, CN, IR (configurable)
-- ⚠️ **Tax Haven Headquarters** - Cayman Islands, BVI, etc.
-- ⚠️ **ADR Status** - American Depositary Receipts
-- ⚠️ **Low Float** - Less than 3M freely tradable shares
-
-## Output Information
-
-For each ticker, the screener displays:
-
-- Company name and basic info
-- Exchange and market details
-- Country of origin and headquarters
-- Market prices (regular, pre-market, after-market)
-- 52-week high/low and percentage off high
-- Trading volume and shares outstanding
-- Float shares (highlighted if low)
-- Short interest metrics
-- Insider and institutional ownership
-- Debt and cash flow
-- Key executives and directors
-- **Risk flags** with severity indicators
+- **Non-US Country of Origin** - Companies headquartered outside the US
+- **High-Risk Countries** - RU, CN, IR (configurable)
+- **Tax Haven Headquarters** - Cayman Islands, BVI, etc.
+- **ADR Status** - American Depositary Receipts
+- **Low Float** - Less than 3M freely tradable shares
 
 ## Configuration
 
-Edit `super_signal/config.py` to customize:
+### Environment Variables
 
-- Risk detection thresholds
-- Display formatting
-- Logging settings
-- Network timeout values
-- ANSI color schemes
+Create a `.env` file in the project root:
 
-### Example: Adjusting Risk Thresholds
+```bash
+# Required for Claude AI analysis
+ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
+```
+
+### Risk Thresholds
+
+Edit `super_signal/config.py` to customize risk detection:
 
 ```python
-# In super_signal/config.py
 RED_FLAGS = RiskThresholds(
-    risky_countries=["RU", "CN", "IR", "KP"],  # Add North Korea
+    risky_countries=["RU", "CN", "IR", "KP"],  # Add countries
     risky_headquarters_keywords=["Cayman", "BVI", "Bermuda"],
-    min_free_float=5_000_000,  # Increase to 5M shares
+    min_free_float=5_000_000,  # Adjust float threshold
 )
 ```
 
 ## Project Structure
 
 ```
-super_signal/
-├── __init__.py              # Package initialization
-├── __main__.py              # Module entry point
-├── main.py                  # Main application logic & CLI arg parsing
-├── cli.py                   # Interactive CLI interface
-├── config.py                # Configuration & settings
-├── models.py                # Data classes (StockInfo, RiskAnalysis)
-├── fetchers/
-│   ├── yahoo_finance.py     # Yahoo Finance API integration
-│   └── finviz.py            # FinViz web scraping
-├── analyzers/
-│   └── risk_analyzer.py     # Risk detection logic
-└── formatters/
-    └── display.py           # Terminal output formatting
+sangre-signal/
+├── .env.example              # Environment template
+├── requirements.txt          # Dependencies
+├── super_signal/
+│   ├── __init__.py
+│   ├── __main__.py           # Entry point
+│   ├── main.py               # CLI argument parsing
+│   ├── cli.py                # Command-line interface
+│   ├── config.py             # Configuration (loads .env)
+│   ├── models.py             # Data classes
+│   ├── fetchers/
+│   │   ├── yahoo_finance.py  # Yahoo Finance API
+│   │   └── finviz.py         # FinViz scraping
+│   ├── analyzers/
+│   │   └── risk_analyzer.py  # Risk detection
+│   └── formatters/
+│       ├── base.py           # Formatter base class
+│       ├── text_formatter.py # Colored terminal output
+│       ├── json_formatter.py # JSON output
+│       ├── csv_formatter.py  # CSV output
+│       └── claude_formatter.py # Claude AI analysis
+└── tests/
 ```
-
-## Development
-
-### Install in Development Mode (with dev tools)
-
-**Windows:**
-```batch
-venv\Scripts\activate
-pip install -e ".[dev]"
-```
-
-**Linux/Mac:**
-```bash
-source venv/bin/activate
-pip install -e ".[dev]"
-```
-
-This installs the package in editable mode with development tools:
-- `pytest` - Testing framework
-- `black` - Code formatter
-- `mypy` - Type checker
-- `ruff` - Fast linter
-
-### Adding New Features
-
-- **New risk checks** → `super_signal/analyzers/risk_analyzer.py`
-- **New data sources** → Create new file in `super_signal/fetchers/`
-- **Display changes** → `super_signal/formatters/display.py`
-- **Configuration** → `super_signal/config.py`
-
-### Publishing to PyPI
-
-Maintainers can publish new versions to PyPI. See [PYPI_DEPLOYMENT.md](PYPI_DEPLOYMENT.md) for complete instructions.
-
-**Quick publish:**
-```bash
-# Update version in pyproject.toml and super_signal/__init__.py
-# Commit changes and create tag
-git add .
-git commit -m "Release v2.1.0"
-git tag v2.1.0
-git push && git push --tags
-
-# GitHub Actions will automatically build and publish to PyPI
-```
-
-Or manually:
-```bash
-python -m build
-twine upload dist/*
-```
-
-## Logging
-
-Logs are automatically written to `super_signal.log` in the current directory.
-
-- **INFO**: Stock lookups, API calls
-- **WARNING**: Network issues, parsing problems
-- **ERROR**: Failed API calls, data unavailable
-
-Change log level with `--log-level` flag or edit `config.py`.
-
-## Future Enhancements
-
-- [ ] Desktop GUI using tkinter or PyQt5
-- [ ] Database storage for historical analysis
-- [ ] Additional data sources (SEC filings, etc.)
-- [x] ~~Portfolio screening (multiple tickers at once)~~ ✅ Added in v2.5.0
-- [x] ~~Export to CSV/Excel~~ ✅ Added in v2.4.0
-- [ ] Custom risk profiles
-- [ ] Email/alert notifications
 
 ## Requirements
 
 - Python 3.10 or higher
-- Internet connection (for fetching stock data)
-- Dependencies: yfinance, requests, beautifulsoup4, lxml, tzdata
+- Internet connection
+- Anthropic API key (for Claude AI features)
+
+### Dependencies
+
+- yfinance - Yahoo Finance data
+- requests - HTTP requests
+- beautifulsoup4 - Web scraping
+- lxml - HTML parsing
+- anthropic - Claude AI API
+- python-dotenv - Environment variable management
 
 ## Troubleshooting
 
-### "Command not found: super-signal"
+### Claude Analysis Shows Fallback Message
 
-Make sure your virtual environment is activated:
+If you see "AI analysis unavailable - ANTHROPIC_API_KEY not set":
 
-**Windows:** `venv\Scripts\activate`
-**Linux/Mac:** `source venv/bin/activate`
-
-### Import Errors
-
-Reinstall the package:
-```bash
-pip install --force-reinstall .
-```
+1. Make sure you have a `.env` file in the project root
+2. Verify your API key is correct
+3. Check that python-dotenv is installed: `pip install python-dotenv`
 
 ### No Data for Ticker
 
@@ -343,14 +246,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
 ## Acknowledgments
 
 - Built with [yfinance](https://github.com/ranaroussi/yfinance) for Yahoo Finance data
 - Web scraping powered by [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/)
-- 🤖 Refactored with assistance from [Claude Code](https://claude.com/claude-code)
+- AI analysis powered by [Claude](https://www.anthropic.com/claude) from Anthropic
+- Developed with assistance from [Claude Code](https://claude.ai/code)
