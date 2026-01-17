@@ -8,6 +8,7 @@ import logging
 from typing import Optional, List
 import requests
 from bs4 import BeautifulSoup
+import yfinance as yf
 
 from ..config import NETWORK_CONFIG
 from ..cache import get_cache
@@ -83,7 +84,7 @@ def is_adr_finviz(ticker: str) -> Optional[bool]:
 
 
 def get_directors(ticker: str, max_count: int = 10) -> List[str]:
-    """Scrape key executives and directors from Yahoo Finance profile page.
+    """Get key executives and directors from yfinance API.
 
     Args:
         ticker: Stock ticker symbol (e.g., 'AAPL')
@@ -101,47 +102,30 @@ def get_directors(ticker: str, max_count: int = 10) -> List[str]:
         # Apply max_count limit to cached result
         return cached_directors[:max_count] if cached_directors else []
 
-    url = f"https://finance.yahoo.com/quote/{ticker}/profile/"
-    headers = {"User-Agent": NETWORK_CONFIG.user_agent}
-
     try:
-        logger.info(f"Fetching directors for {ticker}")
-        resp = requests.get(
-            url,
-            headers=headers,
-            timeout=NETWORK_CONFIG.request_timeout
-        )
+        logger.info(f"Fetching directors for {ticker} via yfinance API")
+        stock = yf.Ticker(ticker)
+        info = stock.info
 
-        if resp.status_code != 200:
-            logger.warning(f"Yahoo Finance returned status {resp.status_code} for {ticker}")
+        # Get company officers from yfinance
+        officers = info.get("companyOfficers", [])
+        if not officers:
+            logger.debug(f"No company officers found for {ticker}")
+            cache.set_directors(ticker, [])
             return []
 
-        soup = BeautifulSoup(resp.text, "html.parser")
-
-        # Find "Key Executives" section
-        table = None
-        for h in soup.find_all(["h2", "h3"]):
-            if "Key Executives" in h.get_text():
-                table = h.find_next("table")
-                break
-
-        if table is None:
-            logger.debug(f"Key Executives table not found for {ticker}")
-            return []
-
-        # Extract directors from table
+        # Extract directors (those with "director" in title)
         directors = []
-        for row in table.find_all("tr"):
-            cells = row.find_all("td")
-            if len(cells) < 2:
-                continue
+        for officer in officers:
+            name = officer.get("name", "")
+            title = officer.get("title", "")
 
-            name = cells[0].get_text(" ", strip=True)
-            title = cells[1].get_text(" ", strip=True)
+            if not name or not title:
+                continue
 
             # Only include entries with "director" in the title
             if "director" in title.lower():
-                directors.append(f"{name} – {title}")
+                directors.append(f"{name} - {title}")
 
             if len(directors) >= max_count:
                 break
@@ -153,11 +137,8 @@ def get_directors(ticker: str, max_count: int = 10) -> List[str]:
 
         return directors
 
-    except requests.RequestException as e:
-        logger.warning(f"Network error fetching directors for {ticker}: {e}")
-        return []
     except Exception as e:
-        logger.error(f"Error parsing directors for {ticker}: {e}")
+        logger.warning(f"Error fetching directors for {ticker}: {e}")
         return []
 
 
