@@ -1,6 +1,6 @@
-# RPM Packaging Guide for Super Signal
+# RPM Packaging Guide for Sangre Signal
 
-This guide explains how to build and package Super Signal for Fedora/RHEL-based distributions.
+This guide explains how to build and package Sangre Signal for Fedora/RHEL-based distributions.
 
 ## Prerequisites
 
@@ -37,11 +37,11 @@ From the project root directory:
 
 ```bash
 # Create a tarball from git
-git archive --format=tar.gz --prefix=super-signal-2.0.0/ v2.0.0 > ~/rpmbuild/SOURCES/super-signal-2.0.0.tar.gz
+git archive --format=tar.gz --prefix=sangre-signal-2.0.0/ v2.0.0 > ~/rpmbuild/SOURCES/sangre-signal-2.0.0.tar.gz
 
 # Or create from current directory
-tar czf ~/rpmbuild/SOURCES/super-signal-2.0.0.tar.gz \
-    --transform 's,^\.,super-signal-2.0.0,' \
+tar czf ~/rpmbuild/SOURCES/sangre-signal-2.0.0.tar.gz \
+    --transform 's,^\.,sangre-signal-2.0.0,' \
     --exclude='.git*' \
     --exclude='venv' \
     --exclude='*.pyc' \
@@ -55,37 +55,37 @@ tar czf ~/rpmbuild/SOURCES/super-signal-2.0.0.tar.gz \
 ### 2. Copy Spec File
 
 ```bash
-cp super-signal.spec ~/rpmbuild/SPECS/
+cp sangre-signal.spec ~/rpmbuild/SPECS/
 ```
 
 ### 3. Install Build Dependencies
 
 ```bash
 # Install dependencies listed in the spec file
-sudo dnf builddep ~/rpmbuild/SPECS/super-signal.spec
+sudo dnf builddep ~/rpmbuild/SPECS/sangre-signal.spec
 ```
 
 ### 4. Build the RPM
 
 ```bash
 # Build both source and binary RPMs
-rpmbuild -ba ~/rpmbuild/SPECS/super-signal.spec
+rpmbuild -ba ~/rpmbuild/SPECS/sangre-signal.spec
 
 # Or build only binary RPM
-rpmbuild -bb ~/rpmbuild/SPECS/super-signal.spec
+rpmbuild -bb ~/rpmbuild/SPECS/sangre-signal.spec
 
 # Or build only source RPM
-rpmbuild -bs ~/rpmbuild/SPECS/super-signal.spec
+rpmbuild -bs ~/rpmbuild/SPECS/sangre-signal.spec
 ```
 
 ### 5. Check for Issues
 
 ```bash
 # Lint the spec file
-rpmlint ~/rpmbuild/SPECS/super-signal.spec
+rpmlint ~/rpmbuild/SPECS/sangre-signal.spec
 
 # Lint the built RPM
-rpmlint ~/rpmbuild/RPMS/noarch/super-signal-2.0.0-1.*.noarch.rpm
+rpmlint ~/rpmbuild/RPMS/noarch/sangre-signal-2.0.0-1.*.noarch.rpm
 ```
 
 ## Installing the Built RPM
@@ -94,20 +94,20 @@ rpmlint ~/rpmbuild/RPMS/noarch/super-signal-2.0.0-1.*.noarch.rpm
 
 ```bash
 # Install the RPM (will pull in dependencies)
-sudo dnf install ~/rpmbuild/RPMS/noarch/super-signal-2.0.0-1.*.noarch.rpm
+sudo dnf install ~/rpmbuild/RPMS/noarch/sangre-signal-2.0.0-1.*.noarch.rpm
 ```
 
 ### Verify Installation
 
 ```bash
 # Check installed files
-rpm -ql super-signal
+rpm -ql sangre-signal
 
 # Verify the package
-rpm -V super-signal
+rpm -V sangre-signal
 
 # Run the application
-super-signal --ticker AAPL
+sangre-signal --ticker AAPL
 ```
 
 ## Testing the Package
@@ -116,19 +116,19 @@ super-signal --ticker AAPL
 
 ```bash
 # Test CLI
-super-signal --ticker AAPL
+sangre-signal --ticker AAPL
 
 # Test Python module
-python3 -m super_signal --ticker TSLA
+python3 -m sangre_signal --ticker TSLA
 
 # Check version
-rpm -qi super-signal
+rpm -qi sangre-signal
 ```
 
 ### Uninstall
 
 ```bash
-sudo dnf remove super-signal
+sudo dnf remove sangre-signal
 ```
 
 ## Submitting to Fedora Repositories
@@ -174,20 +174,20 @@ sudo dnf install copr-cli
 
 ```bash
 # Create repository (one time)
-copr-cli create super-signal --chroot fedora-40-x86_64 ...
+copr-cli create sangre-signal --chroot fedora-40-x86_64 ...
 
 # Build from GitHub
-copr-cli buildscm super-signal \
-    --clone-url https://github.com/TradingAsBuddies/super-signal \
-    --spec super-signal.spec \
+copr-cli buildscm sangre-signal \
+    --clone-url https://github.com/TradingAsBuddies/sangre-signal \
+    --spec sangre-signal.spec \
     --type git
 ```
 
 ### 3. Users Install with
 
 ```bash
-sudo dnf copr enable tradingasbuddies/super-signal
-sudo dnf install super-signal
+sudo dnf copr enable tradingasbuddies/sangre-signal
+sudo dnf install sangre-signal
 ```
 
 ## Updating the Package
@@ -196,7 +196,7 @@ When releasing a new version:
 
 ### 1. Update Version
 
-Edit `super-signal.spec`:
+Edit `sangre-signal.spec`:
 ```spec
 Version:        2.1.0
 Release:        1%{?dist}
@@ -216,10 +216,10 @@ Release:        1%{?dist}
 
 ```bash
 # Create new tarball
-git archive --format=tar.gz --prefix=super-signal-2.1.0/ v2.1.0 > ~/rpmbuild/SOURCES/super-signal-2.1.0.tar.gz
+git archive --format=tar.gz --prefix=sangre-signal-2.1.0/ v2.1.0 > ~/rpmbuild/SOURCES/sangre-signal-2.1.0.tar.gz
 
 # Rebuild RPM
-rpmbuild -ba ~/rpmbuild/SPECS/super-signal.spec
+rpmbuild -ba ~/rpmbuild/SPECS/sangre-signal.spec
 ```
 
 ## Troubleshooting
@@ -236,10 +236,10 @@ If dependencies aren't available in Fedora repos:
 
 ```bash
 # Check build logs
-less ~/rpmbuild/BUILD/super-signal-2.0.0/build.log
+less ~/rpmbuild/BUILD/sangre-signal-2.0.0/build.log
 
 # Use mock for clean environment testing
-mock -r fedora-40-x86_64 ~/rpmbuild/SRPMS/super-signal-2.0.0-1.*.src.rpm
+mock -r fedora-40-x86_64 ~/rpmbuild/SRPMS/sangre-signal-2.0.0-1.*.src.rpm
 ```
 
 ### rpmlint Warnings

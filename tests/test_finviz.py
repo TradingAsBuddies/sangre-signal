@@ -2,7 +2,7 @@
 
 import pytest
 from unittest.mock import Mock, patch
-from super_signal.fetchers.finviz import (
+from sangre_signal.fetchers.finviz import (
     is_adr_finviz,
     get_directors,
     determine_adr_status,
@@ -12,7 +12,7 @@ from super_signal.fetchers.finviz import (
 class TestIsAdrFinviz:
     """Tests for is_adr_finviz function."""
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_is_adr_finviz_detects_adr(self, mock_get):
         """Test ADR detection when ADR is found in content."""
         mock_response = Mock()
@@ -31,7 +31,7 @@ class TestIsAdrFinviz:
         assert result is True
         mock_get.assert_called_once()
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_is_adr_finviz_american_depositary(self, mock_get):
         """Test ADR detection with 'American Depositary' text."""
         mock_response = Mock()
@@ -49,7 +49,7 @@ class TestIsAdrFinviz:
 
         assert result is True
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_is_adr_finviz_not_adr(self, mock_get):
         """Test when stock is not an ADR."""
         mock_response = Mock()
@@ -70,7 +70,7 @@ class TestIsAdrFinviz:
 
         assert result is False
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_is_adr_finviz_non_200_status(self, mock_get):
         """Test handling of non-200 HTTP status."""
         mock_response = Mock()
@@ -81,7 +81,7 @@ class TestIsAdrFinviz:
 
         assert result is None
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_is_adr_finviz_no_tables(self, mock_get):
         """Test when expected tables are not found."""
         mock_response = Mock()
@@ -93,7 +93,7 @@ class TestIsAdrFinviz:
 
         assert result is None
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_is_adr_finviz_network_error(self, mock_get):
         """Test handling of network errors."""
         import requests
@@ -103,7 +103,7 @@ class TestIsAdrFinviz:
 
         assert result is None
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_is_adr_finviz_parsing_error(self, mock_get):
         """Test handling of parsing errors."""
         mock_response = Mock()
@@ -115,7 +115,7 @@ class TestIsAdrFinviz:
 
         assert result is None
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_is_adr_finviz_case_insensitive(self, mock_get):
         """Test that ADR detection is case-insensitive."""
         mock_response = Mock()
@@ -133,7 +133,7 @@ class TestIsAdrFinviz:
 
         assert result is True
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_is_adr_finviz_checks_both_tables(self, mock_get):
         """Test that both tables are checked."""
         mock_response = Mock()
@@ -158,7 +158,7 @@ class TestIsAdrFinviz:
 class TestGetDirectors:
     """Tests for get_directors function."""
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_get_directors_success(self, mock_get):
         """Test successful director retrieval."""
         mock_response = Mock()
@@ -194,7 +194,7 @@ class TestGetDirectors:
         assert 'Jane Smith – Board Director' in result
         assert not any('CEO' in d for d in result)
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_get_directors_max_count(self, mock_get):
         """Test that max_count parameter limits results."""
         mock_response = Mock()
@@ -216,7 +216,7 @@ class TestGetDirectors:
 
         assert len(result) == 5
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_get_directors_no_table_found(self, mock_get):
         """Test when Key Executives table is not found."""
         mock_response = Mock()
@@ -228,7 +228,7 @@ class TestGetDirectors:
 
         assert result == []
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_get_directors_non_200_status(self, mock_get):
         """Test handling of non-200 HTTP status."""
         mock_response = Mock()
@@ -239,7 +239,7 @@ class TestGetDirectors:
 
         assert result == []
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_get_directors_network_error(self, mock_get):
         """Test handling of network errors."""
         import requests
@@ -249,7 +249,7 @@ class TestGetDirectors:
 
         assert result == []
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_get_directors_parsing_error(self, mock_get):
         """Test handling of parsing errors."""
         mock_response = Mock()
@@ -262,7 +262,7 @@ class TestGetDirectors:
         # Should handle gracefully, return empty list
         assert isinstance(result, list)
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_get_directors_case_insensitive_director_filter(self, mock_get):
         """Test that director filtering is case-insensitive."""
         mock_response = Mock()
@@ -295,7 +295,7 @@ class TestGetDirectors:
 
         assert len(result) == 3
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_get_directors_filters_non_directors(self, mock_get):
         """Test that non-director executives are filtered out."""
         mock_response = Mock()
@@ -329,7 +329,7 @@ class TestGetDirectors:
         assert len(result) == 1
         assert 'Director Name' in result[0]
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_get_directors_handles_malformed_rows(self, mock_get):
         """Test handling of table rows with insufficient cells."""
         mock_response = Mock()
@@ -360,7 +360,7 @@ class TestGetDirectors:
 class TestDetermineAdrStatus:
     """Tests for determine_adr_status function."""
 
-    @patch('super_signal.fetchers.finviz.is_adr_finviz')
+    @patch('sangre_signal.fetchers.finviz.is_adr_finviz')
     def test_determine_adr_status_finviz_true(self, mock_is_adr):
         """Test when FinViz definitively says it's an ADR."""
         mock_is_adr.return_value = True
@@ -370,7 +370,7 @@ class TestDetermineAdrStatus:
         assert result is True
         mock_is_adr.assert_called_once_with('TEST')
 
-    @patch('super_signal.fetchers.finviz.is_adr_finviz')
+    @patch('sangre_signal.fetchers.finviz.is_adr_finviz')
     def test_determine_adr_status_finviz_false(self, mock_is_adr):
         """Test when FinViz definitively says it's not an ADR."""
         mock_is_adr.return_value = False
@@ -380,7 +380,7 @@ class TestDetermineAdrStatus:
         # FinViz takes precedence over Yahoo check
         assert result is False
 
-    @patch('super_signal.fetchers.finviz.is_adr_finviz')
+    @patch('sangre_signal.fetchers.finviz.is_adr_finviz')
     def test_determine_adr_status_finviz_none_yahoo_true(self, mock_is_adr):
         """Test fallback to Yahoo check when FinViz returns None."""
         mock_is_adr.return_value = None
@@ -389,7 +389,7 @@ class TestDetermineAdrStatus:
 
         assert result is True
 
-    @patch('super_signal.fetchers.finviz.is_adr_finviz')
+    @patch('sangre_signal.fetchers.finviz.is_adr_finviz')
     def test_determine_adr_status_finviz_none_yahoo_false(self, mock_is_adr):
         """Test fallback to Yahoo check when FinViz returns None."""
         mock_is_adr.return_value = None
@@ -398,7 +398,7 @@ class TestDetermineAdrStatus:
 
         assert result is False
 
-    @patch('super_signal.fetchers.finviz.is_adr_finviz')
+    @patch('sangre_signal.fetchers.finviz.is_adr_finviz')
     def test_determine_adr_status_precedence(self, mock_is_adr):
         """Test that FinViz takes precedence over Yahoo."""
         # FinViz says False, Yahoo says True
@@ -413,7 +413,7 @@ class TestDetermineAdrStatus:
 class TestFinvizEdgeCases:
     """Tests for edge cases in FinViz fetcher."""
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_is_adr_finviz_empty_response(self, mock_get):
         """Test with empty response body."""
         mock_response = Mock()
@@ -425,7 +425,7 @@ class TestFinvizEdgeCases:
 
         assert result is None
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_is_adr_finviz_timeout(self, mock_get):
         """Test handling of request timeout."""
         import requests
@@ -435,7 +435,7 @@ class TestFinvizEdgeCases:
 
         assert result is None
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_get_directors_empty_table(self, mock_get):
         """Test with empty Key Executives table."""
         mock_response = Mock()
@@ -452,7 +452,7 @@ class TestFinvizEdgeCases:
 
         assert result == []
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_get_directors_finds_h3_heading(self, mock_get):
         """Test that function works with h3 heading instead of h2."""
         mock_response = Mock()
@@ -476,7 +476,7 @@ class TestFinvizEdgeCases:
         assert len(result) == 1
         assert 'Director Name' in result[0]
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_is_adr_finviz_uses_user_agent(self, mock_get):
         """Test that requests include proper User-Agent header."""
         mock_response = Mock()
@@ -491,7 +491,7 @@ class TestFinvizEdgeCases:
         assert 'headers' in call_args.kwargs
         assert 'User-Agent' in call_args.kwargs['headers']
 
-    @patch('super_signal.fetchers.finviz.requests.get')
+    @patch('sangre_signal.fetchers.finviz.requests.get')
     def test_get_directors_uses_timeout(self, mock_get):
         """Test that requests include timeout parameter."""
         mock_response = Mock()

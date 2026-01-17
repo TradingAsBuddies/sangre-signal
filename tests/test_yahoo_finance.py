@@ -3,20 +3,20 @@
 import pytest
 from unittest.mock import Mock, MagicMock, patch
 import pandas as pd
-from super_signal.fetchers.yahoo_finance import (
+from sangre_signal.fetchers.yahoo_finance import (
     fetch_stock_info,
     is_adr_yahoo,
     get_operating_cash_flow,
     interpret_split_factor,
     get_last_split_details,
 )
-from super_signal.models import StockInfo
+from sangre_signal.models import StockInfo
 
 
 class TestFetchStockInfo:
     """Tests for fetch_stock_info function."""
 
-    @patch('super_signal.fetchers.yahoo_finance.yf.Ticker')
+    @patch('sangre_signal.fetchers.yahoo_finance.yf.Ticker')
     def test_fetch_stock_info_success(self, mock_ticker_class):
         """Test successful stock info fetch."""
         # Setup mock
@@ -44,7 +44,7 @@ class TestFetchStockInfo:
         assert result.country == 'United States'
         assert result.regular_market_price == 180.50
 
-    @patch('super_signal.fetchers.yahoo_finance.yf.Ticker')
+    @patch('sangre_signal.fetchers.yahoo_finance.yf.Ticker')
     def test_fetch_stock_info_no_data(self, mock_ticker_class):
         """Test fetch when no data is returned."""
         mock_ticker = Mock()
@@ -55,7 +55,7 @@ class TestFetchStockInfo:
 
         assert result is None
 
-    @patch('super_signal.fetchers.yahoo_finance.yf.Ticker')
+    @patch('sangre_signal.fetchers.yahoo_finance.yf.Ticker')
     def test_fetch_stock_info_exception(self, mock_ticker_class):
         """Test fetch handles exceptions gracefully."""
         mock_ticker_class.side_effect = Exception("Network error")
@@ -64,7 +64,7 @@ class TestFetchStockInfo:
 
         assert result is None
 
-    @patch('super_signal.fetchers.yahoo_finance.yf.Ticker')
+    @patch('sangre_signal.fetchers.yahoo_finance.yf.Ticker')
     def test_fetch_stock_info_uses_price_fallback(self, mock_ticker_class):
         """Test that fetch uses 'price' field as fallback for regularMarketPrice."""
         mock_ticker = Mock()
@@ -81,7 +81,7 @@ class TestFetchStockInfo:
         assert result is not None
         assert result.regular_market_price == 100.50
 
-    @patch('super_signal.fetchers.yahoo_finance.yf.Ticker')
+    @patch('sangre_signal.fetchers.yahoo_finance.yf.Ticker')
     def test_fetch_stock_info_includes_all_fields(self, mock_ticker_class):
         """Test that fetch_stock_info includes all expected fields."""
         mock_ticker = Mock()
@@ -426,7 +426,7 @@ class TestYahooFinanceEdgeCases:
         )
         assert is_adr_yahoo(stock) is True
 
-    @patch('super_signal.fetchers.yahoo_finance.yf.Ticker')
+    @patch('sangre_signal.fetchers.yahoo_finance.yf.Ticker')
     def test_fetch_handles_missing_optional_fields(self, mock_ticker_class):
         """Test that fetch handles missing optional fields."""
         mock_ticker = Mock()

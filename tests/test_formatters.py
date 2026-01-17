@@ -4,7 +4,7 @@ import json
 import pytest
 from unittest.mock import patch, MagicMock
 
-from super_signal.formatters import (
+from sangre_signal.formatters import (
     get_formatter,
     BaseFormatter,
     TextFormatter,
@@ -12,7 +12,7 @@ from super_signal.formatters import (
     CsvFormatter,
     ClaudeFormatter,
 )
-from super_signal.formatters.claude_formatter import (
+from sangre_signal.formatters.claude_formatter import (
     _strip_emojis,
     _safe_encode_for_console,
     _format_number,
@@ -21,9 +21,9 @@ from super_signal.formatters.claude_formatter import (
     ANALYSIS_PROMPTS,
     BATCH_PROMPTS,
 )
-from super_signal.config import ClaudeConfig
-from super_signal.models import StockInfo, RiskAnalysis, RiskFlag, RiskSeverity
-from super_signal.cli import TickerResult
+from sangre_signal.config import ClaudeConfig
+from sangre_signal.models import StockInfo, RiskAnalysis, RiskFlag, RiskSeverity
+from sangre_signal.cli import TickerResult
 
 
 class TestGetFormatter:
@@ -516,7 +516,7 @@ class TestSafeEncodeForConsole:
     def test_transliterates_spanish_accents(self):
         """Test that Spanish accents are transliterated on Windows."""
         text = "Análisis de inversión"
-        with patch('super_signal.formatters.claude_formatter.sys') as mock_sys:
+        with patch('sangre_signal.formatters.claude_formatter.sys') as mock_sys:
             mock_sys.platform = 'win32'
             mock_sys.stdout.encoding = 'cp1252'
             result = _safe_encode_for_console(text)
@@ -526,7 +526,7 @@ class TestSafeEncodeForConsole:
     def test_transliterates_n_tilde(self):
         """Test that ñ is transliterated to n on Windows."""
         text = "España"
-        with patch('super_signal.formatters.claude_formatter.sys') as mock_sys:
+        with patch('sangre_signal.formatters.claude_formatter.sys') as mock_sys:
             mock_sys.platform = 'win32'
             mock_sys.stdout.encoding = 'cp1252'
             result = _safe_encode_for_console(text)
@@ -535,7 +535,7 @@ class TestSafeEncodeForConsole:
     def test_transliterates_inverted_punctuation(self):
         """Test that inverted punctuation is transliterated."""
         text = "¿Cómo estás? ¡Hola!"
-        with patch('super_signal.formatters.claude_formatter.sys') as mock_sys:
+        with patch('sangre_signal.formatters.claude_formatter.sys') as mock_sys:
             mock_sys.platform = 'win32'
             mock_sys.stdout.encoding = 'cp1252'
             result = _safe_encode_for_console(text)
@@ -547,7 +547,7 @@ class TestSafeEncodeForConsole:
     def test_transliterates_bullet_points(self):
         """Test that bullet points are transliterated to dashes."""
         text = "• Item one • Item two"
-        with patch('super_signal.formatters.claude_formatter.sys') as mock_sys:
+        with patch('sangre_signal.formatters.claude_formatter.sys') as mock_sys:
             mock_sys.platform = 'win32'
             mock_sys.stdout.encoding = 'cp1252'
             result = _safe_encode_for_console(text)
@@ -556,7 +556,7 @@ class TestSafeEncodeForConsole:
     def test_preserves_text_on_utf8(self):
         """Test that text is preserved on UTF-8 systems."""
         text = "Análisis de inversión con ñ"
-        with patch('super_signal.formatters.claude_formatter.sys') as mock_sys:
+        with patch('sangre_signal.formatters.claude_formatter.sys') as mock_sys:
             mock_sys.platform = 'linux'
             mock_sys.stdout.encoding = 'utf-8'
             result = _safe_encode_for_console(text)
@@ -565,7 +565,7 @@ class TestSafeEncodeForConsole:
     def test_preserves_text_on_non_windows(self):
         """Test that text is preserved on non-Windows systems."""
         text = "Análisis español"
-        with patch('super_signal.formatters.claude_formatter.sys') as mock_sys:
+        with patch('sangre_signal.formatters.claude_formatter.sys') as mock_sys:
             mock_sys.platform = 'darwin'
             mock_sys.stdout.encoding = 'utf-8'
             result = _safe_encode_for_console(text)

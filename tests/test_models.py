@@ -1,7 +1,7 @@
 """Tests for data models."""
 
 import pytest
-from super_signal.models import StockInfo, RiskFlag, RiskAnalysis, RiskSeverity
+from sangre_signal.models import StockInfo, RiskFlag, RiskAnalysis, RiskSeverity
 
 
 class TestStockInfo:

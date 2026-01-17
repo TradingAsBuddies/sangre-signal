@@ -2,8 +2,8 @@
 
 import pytest
 
-from super_signal.cli import normalize_tickers, TickerResult
-from super_signal.models import StockInfo, RiskAnalysis
+from sangre_signal.cli import normalize_tickers, TickerResult
+from sangre_signal.models import StockInfo, RiskAnalysis
 
 
 class TestNormalizeTickers:

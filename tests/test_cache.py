@@ -4,8 +4,8 @@ import time
 import pytest
 from unittest.mock import patch
 
-from super_signal.cache import StockCache, get_cache, clear_cache, _cache
-from super_signal.models import StockInfo
+from sangre_signal.cache import StockCache, get_cache, clear_cache, _cache
+from sangre_signal.models import StockInfo
 
 
 class TestStockCacheInitialization:

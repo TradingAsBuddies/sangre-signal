@@ -1,6 +1,6 @@
 # PyPI Deployment Guide
 
-Guide for publishing Super Signal to PyPI as user `davdunc`.
+Guide for publishing Sangre Signal to PyPI as user `davdunc`.
 
 ## Prerequisites
 
@@ -21,13 +21,13 @@ pip install --upgrade build twine
 1. Go to: https://pypi.org/manage/account/
 2. Scroll to "API tokens"
 3. Click "Add API token"
-4. Name: `super-signal-upload`
-5. Scope: "Project: super-signal" (after first upload) or "Entire account"
+4. Name: `sangre-signal-upload`
+5. Scope: "Project: sangre-signal" (after first upload) or "Entire account"
 6. Save the token (starts with `pypi-`)
 
 #### For Test PyPI (Testing)
 1. Go to: https://test.pypi.org/manage/account/
-2. Create token: `super-signal-test`
+2. Create token: `sangre-signal-test`
 3. Save the token
 
 ### 4. Configure PyPI Credentials
@@ -58,7 +58,7 @@ password = pypi-YOUR_TEST_TOKEN_HERE
 
 Before each release, update version in:
 - `pyproject.toml` (line 7: `version = "2.0.0"`)
-- `super_signal/__init__.py` (line 16: `__version__ = "2.0.0"`)
+- `sangre_signal/__init__.py` (line 16: `__version__ = "2.0.0"`)
 
 Use semantic versioning: MAJOR.MINOR.PATCH
 
@@ -73,8 +73,8 @@ python -m build
 ```
 
 This creates:
-- `dist/super_signal-2.0.0.tar.gz` (source distribution)
-- `dist/super_signal-2.0.0-py3-none-any.whl` (wheel)
+- `dist/sangre_signal-2.0.0.tar.gz` (source distribution)
+- `dist/sangre_signal-2.0.0-py3-none-any.whl` (wheel)
 
 ### 3. Check Distribution
 
@@ -92,7 +92,7 @@ Should show: `Checking dist/... PASSED`
 twine upload --repository testpypi dist/*
 
 # Test installation
-pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ super-signal
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ sangre-signal
 ```
 
 Note: `--extra-index-url` allows dependencies from regular PyPI.
@@ -104,19 +104,19 @@ Note: `--extra-index-url` allows dependencies from regular PyPI.
 twine upload dist/*
 ```
 
-You'll see: `Uploading super_signal-2.0.0-py3-none-any.whl` and success message.
+You'll see: `Uploading sangre_signal-2.0.0-py3-none-any.whl` and success message.
 
 ### 6. Verify
 
 ```bash
 # Install from PyPI
-pip install super-signal
+pip install sangre-signal
 
 # Test it
-super-signal --ticker AAPL
+sangre-signal --ticker AAPL
 ```
 
-View on PyPI: https://pypi.org/project/super-signal/
+View on PyPI: https://pypi.org/project/sangre-signal/
 
 ## Automated Publishing with GitHub Actions
 
@@ -124,7 +124,7 @@ See `.github/workflows/publish-pypi.yml` for automated publishing on git tags.
 
 ### Setup GitHub Secrets
 
-1. Go to: https://github.com/TradingAsBuddies/super-signal/settings/secrets/actions
+1. Go to: https://github.com/TradingAsBuddies/sangre-signal/settings/secrets/actions
 2. Add secrets:
    - `PYPI_API_TOKEN`: Your PyPI production token
    - `TEST_PYPI_API_TOKEN`: Your Test PyPI token
@@ -228,8 +228,8 @@ dependencies = [
 Check package structure:
 ```bash
 # After install, verify imports
-python -c "from super_signal import StockInfo"
-python -c "from super_signal.cli import run_cli"
+python -c "from sangre_signal import StockInfo"
+python -c "from sangre_signal.cli import run_cli"
 ```
 
 ## Best Practices
@@ -243,9 +243,9 @@ python -c "from super_signal.cli import run_cli"
 
 ## Package Information
 
-- **Package name**: `super-signal`
-- **Import name**: `super_signal`
-- **PyPI URL**: https://pypi.org/project/super-signal/
+- **Package name**: `sangre-signal`
+- **Import name**: `sangre_signal`
+- **PyPI URL**: https://pypi.org/project/sangre-signal/
 - **Maintainer**: davdunc (David Duncan)
 - **License**: MIT
 
@@ -253,13 +253,13 @@ python -c "from super_signal.cli import run_cli"
 
 ```bash
 # View package info
-pip show super-signal
+pip show sangre-signal
 
 # List files in package
-tar tzf dist/super_signal-2.0.0.tar.gz
+tar tzf dist/sangre_signal-2.0.0.tar.gz
 
 # Check wheel contents
-unzip -l dist/super_signal-2.0.0-py3-none-any.whl
+unzip -l dist/sangre_signal-2.0.0-py3-none-any.whl
 
 # Install in editable mode for development
 pip install -e .

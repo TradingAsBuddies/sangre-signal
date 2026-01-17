@@ -13,7 +13,7 @@ import yfinance as yf
 from ..config import NETWORK_CONFIG
 from ..cache import get_cache
 
-logger = logging.getLogger("super_signal.fetchers.finviz")
+logger = logging.getLogger("sangre_signal.fetchers.finviz")
 
 
 def is_adr_finviz(ticker: str) -> Optional[bool]:

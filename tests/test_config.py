@@ -3,7 +3,7 @@
 import sys
 from unittest.mock import Mock, patch
 import pytest
-from super_signal.config import (
+from sangre_signal.config import (
     _get_safe_horizontal_line,
     DisplayConfig,
     DISPLAY_CONFIG,

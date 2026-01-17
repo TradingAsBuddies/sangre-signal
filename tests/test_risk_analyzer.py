@@ -1,8 +1,8 @@
 """Tests for risk analyzer module."""
 
 import pytest
-from super_signal.models import StockInfo, RiskSeverity
-from super_signal.analyzers.risk_analyzer import (
+from sangre_signal.models import StockInfo, RiskSeverity
+from sangre_signal.analyzers.risk_analyzer import (
     RiskAnalyzer,
     analyze_stock_risks,
     _country_matches,

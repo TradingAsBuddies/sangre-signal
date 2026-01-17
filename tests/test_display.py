@@ -2,14 +2,14 @@
 
 import pytest
 
-from super_signal.formatters.display import (
+from sangre_signal.formatters.display import (
     calculate_relative_volume,
     format_relative_volume,
     format_vix,
     format_number,
     format_percent,
 )
-from super_signal.config import ANSIColor
+from sangre_signal.config import ANSIColor
 
 
 class TestCalculateRelativeVolume:

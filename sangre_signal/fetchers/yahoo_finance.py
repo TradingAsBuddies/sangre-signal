@@ -17,7 +17,7 @@ from ..models import StockInfo
 from ..config import US_COUNTRY_VARIATIONS
 from ..cache import get_cache
 
-logger = logging.getLogger("super_signal.fetchers.yahoo_finance")
+logger = logging.getLogger("sangre_signal.fetchers.yahoo_finance")
 
 T = TypeVar('T')
 

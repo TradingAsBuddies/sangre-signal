@@ -1,15 +1,15 @@
 # Deployment Quick Start Guide
 
-Quick reference for deploying Super Signal to PyPI and COPR as user `davdunc`.
+Quick reference for deploying Sangre Signal to PyPI and COPR as user `davdunc`.
 
-## PyPI Deployment (pip install super-signal)
+## PyPI Deployment (pip install sangre-signal)
 
 ### One-Time Setup
 
 1. **Get PyPI API Token**
    - Login to https://pypi.org/ as `davdunc`
    - Go to Account Settings → API tokens
-   - Create token named "super-signal-upload"
+   - Create token named "sangre-signal-upload"
    - Save token (starts with `pypi-`)
 
 2. **Configure Local Credentials**
@@ -43,7 +43,7 @@ Quick reference for deploying Super Signal to PyPI and COPR as user `davdunc`.
 ```bash
 # 1. Update version
 #    - Edit pyproject.toml line 7: version = "2.1.0"
-#    - Edit super_signal/__init__.py line 16: __version__ = "2.1.0"
+#    - Edit sangre_signal/__init__.py line 16: __version__ = "2.1.0"
 
 # 2. Commit and tag
 git add .
@@ -84,15 +84,15 @@ git push --tags
 ### Verify
 
 ```bash
-pip install super-signal
-super-signal --ticker AAPL
+pip install sangre-signal
+sangre-signal --ticker AAPL
 ```
 
-View on PyPI: https://pypi.org/project/super-signal/
+View on PyPI: https://pypi.org/project/sangre-signal/
 
 ---
 
-## COPR Deployment (Fedora/RHEL: sudo dnf install super-signal)
+## COPR Deployment (Fedora/RHEL: sudo dnf install sangre-signal)
 
 ### One-Time Setup
 
@@ -115,18 +115,18 @@ View on PyPI: https://pypi.org/project/super-signal/
 
 3. **Create Repository** (one-time)
    ```bash
-   copr-cli create super-signal \
+   copr-cli create sangre-signal \
        --chroot fedora-39-x86_64 \
        --chroot fedora-40-x86_64 \
        --chroot fedora-41-x86_64 \
        --chroot fedora-rawhide-x86_64 \
-       --description "Super Signal - Advanced stock analysis tool"
+       --description "Sangre Signal - Advanced stock analysis tool"
    ```
 
 ### Building New Version
 
 ```bash
-# 1. Update super-signal.spec:
+# 1. Update sangre-signal.spec:
 #    - Line 2: Version: 2.1.0
 #    - Line 3: Release: 1%{?dist}
 #    - Add changelog entry at bottom
@@ -138,26 +138,26 @@ git tag v2.1.0
 git push && git push --tags
 
 # 3. Build on COPR
-copr-cli buildscm super-signal \
-    --clone-url https://github.com/TradingAsBuddies/super-signal \
+copr-cli buildscm sangre-signal \
+    --clone-url https://github.com/TradingAsBuddies/sangre-signal \
     --committish v2.1.0 \
-    --spec super-signal.spec \
+    --spec sangre-signal.spec \
     --type git \
     --method make_srpm
 
 # 4. Monitor build
-copr-cli list-builds super-signal
+copr-cli list-builds sangre-signal
 ```
 
 ### Verify
 
 ```bash
-sudo dnf copr enable tradingasbuddies/super-signal
-sudo dnf install super-signal
-super-signal --ticker AAPL
+sudo dnf copr enable tradingasbuddies/sangre-signal
+sudo dnf install sangre-signal
+sangre-signal --ticker AAPL
 ```
 
-View on COPR: https://copr.fedorainfracloud.org/coprs/tradingasbuddies/super-signal/
+View on COPR: https://copr.fedorainfracloud.org/coprs/tradingasbuddies/sangre-signal/
 
 ---
 
@@ -166,26 +166,26 @@ View on COPR: https://copr.fedorainfracloud.org/coprs/tradingasbuddies/super-sig
 For each new version:
 
 - [ ] Update version in `pyproject.toml`
-- [ ] Update version in `super_signal/__init__.py`
-- [ ] Update `super-signal.spec` (version, release, changelog)
+- [ ] Update version in `sangre_signal/__init__.py`
+- [ ] Update `sangre-signal.spec` (version, release, changelog)
 - [ ] Update `CHANGELOG.md` (if exists)
 - [ ] Commit: `git commit -m "Release vX.Y.Z"`
 - [ ] Tag: `git tag vX.Y.Z`
 - [ ] Push: `git push && git push --tags`
 - [ ] PyPI: Automatic via GitHub Actions OR manual `twine upload`
-- [ ] COPR: `copr-cli buildscm super-signal ...`
+- [ ] COPR: `copr-cli buildscm sangre-signal ...`
 - [ ] Test installations:
-  - `pip install super-signal`
-  - `sudo dnf copr enable tradingasbuddies/super-signal && sudo dnf install super-signal`
+  - `pip install sangre-signal`
+  - `sudo dnf copr enable tradingasbuddies/sangre-signal && sudo dnf install sangre-signal`
 
 ---
 
 ## URLs
 
-- **PyPI**: https://pypi.org/project/super-signal/
-- **COPR**: https://copr.fedorainfracloud.org/coprs/tradingasbuddies/super-signal/
-- **GitHub**: https://github.com/TradingAsBuddies/super-signal
-- **GitHub Actions**: https://github.com/TradingAsBuddies/super-signal/actions
+- **PyPI**: https://pypi.org/project/sangre-signal/
+- **COPR**: https://copr.fedorainfracloud.org/coprs/tradingasbuddies/sangre-signal/
+- **GitHub**: https://github.com/TradingAsBuddies/sangre-signal
+- **GitHub Actions**: https://github.com/TradingAsBuddies/sangre-signal/actions
 
 ---
 

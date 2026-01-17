@@ -16,7 +16,7 @@ from typing import Optional, List, Tuple
 
 from .models import StockInfo
 
-logger = logging.getLogger("super_signal.cache")
+logger = logging.getLogger("sangre_signal.cache")
 
 # Default cache TTL in seconds (4 hours - stock data doesn't change frequently)
 DEFAULT_TTL = 4 * 3600

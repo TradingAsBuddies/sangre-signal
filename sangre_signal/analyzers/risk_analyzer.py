@@ -11,7 +11,7 @@ from typing import List
 from ..models import StockInfo, RiskAnalysis, RiskFlag, RiskSeverity
 from ..config import RED_FLAGS, US_COUNTRY_VARIATIONS
 
-logger = logging.getLogger("super_signal.analyzers.risk_analyzer")
+logger = logging.getLogger("sangre_signal.analyzers.risk_analyzer")
 
 
 def _country_matches(value: str, patterns: List[str]) -> bool:

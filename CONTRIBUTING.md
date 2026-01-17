@@ -1,6 +1,6 @@
-# Contributing to Super Signal
+# Contributing to Sangre Signal
 
-Thank you for your interest in contributing to Super Signal! We welcome contributions from the community.
+Thank you for your interest in contributing to Sangre Signal! We welcome contributions from the community.
 
 ## Project Maintainer
 
@@ -31,8 +31,8 @@ We love new ideas! To suggest an enhancement:
 
 1. **Fork the repository**
    ```bash
-   git clone https://github.com/TradingAsBuddies/super-signal.git
-   cd super-signal
+   git clone https://github.com/TradingAsBuddies/sangre-signal.git
+   cd sangre-signal
    ```
 
 2. **Create a feature branch**
@@ -56,16 +56,16 @@ We love new ideas! To suggest an enhancement:
 5. **Test your changes**
    ```bash
    # Run syntax checks
-   python -m py_compile super_signal/**/*.py
+   python -m py_compile sangre_signal/**/*.py
 
    # Run tests (if available)
    pytest
 
    # Format code
-   black super_signal/
+   black sangre_signal/
 
    # Check types
-   mypy super_signal/
+   mypy sangre_signal/
    ```
 
 6. **Commit your changes**
@@ -108,11 +108,11 @@ We love new ideas! To suggest an enhancement:
 ### Project Structure
 
 When adding new features, place them in the appropriate module:
-- **New risk checks** → `super_signal/analyzers/risk_analyzer.py`
-- **New data sources** → Create new file in `super_signal/fetchers/`
-- **Display changes** → `super_signal/formatters/display.py`
-- **Configuration** → `super_signal/config.py`
-- **Data models** → `super_signal/models.py`
+- **New risk checks** → `sangre_signal/analyzers/risk_analyzer.py`
+- **New data sources** → Create new file in `sangre_signal/fetchers/`
+- **Display changes** → `sangre_signal/formatters/display.py`
+- **Configuration** → `sangre_signal/config.py`
+- **Data models** → `sangre_signal/models.py`
 
 ### Documentation
 
@@ -180,8 +180,8 @@ If you have questions about contributing, feel free to:
 
 ## License
 
-By contributing to Super Signal, you agree that your contributions will be licensed under the MIT License.
+By contributing to Sangre Signal, you agree that your contributions will be licensed under the MIT License.
 
 ---
 
-Thank you for contributing to Super Signal! 🚀📈
+Thank you for contributing to Sangre Signal! 🚀📈

@@ -58,13 +58,13 @@ Get your API key at: https://console.anthropic.com/
 
 ```bash
 # Basic stock analysis (text format)
-python -m super_signal -t AAPL
+python -m sangre_signal -t AAPL
 
 # Multiple stocks
-python -m super_signal -t AAPL,TSLA,MSFT
+python -m sangre_signal -t AAPL,TSLA,MSFT
 
 # Interactive mode
-python -m super_signal
+python -m sangre_signal
 ```
 
 ## Claude AI Analysis
@@ -74,13 +74,13 @@ The Claude AI format provides natural language explanations of stock risks that 
 ### English Analysis
 
 ```bash
-python -m super_signal -t AAPL -f claude
+python -m sangre_signal -t AAPL -f claude
 ```
 
 ### Spanish Analysis (Mexican Spanish)
 
 ```bash
-python -m super_signal -t AAPL -f claude -L es
+python -m sangre_signal -t AAPL -f claude -L es
 ```
 
 ### Portfolio Analysis
@@ -88,7 +88,7 @@ python -m super_signal -t AAPL -f claude -L es
 When analyzing multiple stocks with Claude, you get individual analyses plus a consolidated portfolio summary:
 
 ```bash
-python -m super_signal -t AAPL,TSLA,BABA -f claude
+python -m sangre_signal -t AAPL,TSLA,BABA -f claude
 ```
 
 This provides:
@@ -132,19 +132,19 @@ investors seeking exposure to a proven technology leader...
 
 ```bash
 # Text - colored terminal output (default)
-python -m super_signal -t AAPL -f text
+python -m sangre_signal -t AAPL -f text
 
 # JSON - machine-readable format
-python -m super_signal -t AAPL -f json
+python -m sangre_signal -t AAPL -f json
 
 # CSV - spreadsheet format
-python -m super_signal -t AAPL -f csv
+python -m sangre_signal -t AAPL -f csv
 
 # Claude - AI-powered analysis
-python -m super_signal -t AAPL -f claude
+python -m sangre_signal -t AAPL -f claude
 
 # Claude in Spanish
-python -m super_signal -t AAPL -f claude -L es
+python -m sangre_signal -t AAPL -f claude -L es
 ```
 
 ## Cache and Rate Limiting
@@ -164,7 +164,7 @@ Stock data is cached locally to minimize API requests:
 Check your current rate limit usage:
 
 ```bash
-python -m super_signal --status
+python -m sangre_signal --status
 ```
 
 Example output:
@@ -184,7 +184,7 @@ Cache TTL: 4.0 hours
 If you need fresh data or want to reset the cache:
 
 ```bash
-python -m super_signal --clear-cache
+python -m sangre_signal --clear-cache
 ```
 
 ## Risk Factors Detected
@@ -210,7 +210,7 @@ ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
 
 ### Risk Thresholds
 
-Edit `super_signal/config.py` to customize risk detection:
+Edit `sangre_signal/config.py` to customize risk detection:
 
 ```python
 RED_FLAGS = RiskThresholds(
@@ -226,7 +226,7 @@ RED_FLAGS = RiskThresholds(
 sangre-signal/
 ├── .env.example              # Environment template
 ├── requirements.txt          # Dependencies
-├── super_signal/
+├── sangre_signal/
 │   ├── __init__.py
 │   ├── __main__.py           # Entry point
 │   ├── main.py               # CLI argument parsing
@@ -284,7 +284,7 @@ If you see "AI analysis unavailable - ANTHROPIC_API_KEY not set":
 If you see "429 Too Many Requests" errors:
 
 1. **Wait 15-60 minutes** - Yahoo Finance rate limits typically expire within an hour
-2. **Check status**: `python -m super_signal --status`
+2. **Check status**: `python -m sangre_signal --status`
 3. **Use cached data** - Previously fetched tickers are cached for 4 hours
 4. **Reduce batch sizes** - Analyze fewer stocks at once
 

@@ -18,7 +18,7 @@ from .base import BaseFormatter
 if TYPE_CHECKING:
     from ..cli import TickerResult
 
-logger = logging.getLogger("super_signal")
+logger = logging.getLogger("sangre_signal")
 
 
 def _strip_emojis(text: str) -> str:

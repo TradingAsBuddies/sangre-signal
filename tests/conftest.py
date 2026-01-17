@@ -1,8 +1,8 @@
 """Shared pytest fixtures for super-signal tests."""
 
 import pytest
-from super_signal.models import StockInfo, RiskFlag, RiskAnalysis, RiskSeverity
-from super_signal.cache import clear_cache
+from sangre_signal.models import StockInfo, RiskFlag, RiskAnalysis, RiskSeverity
+from sangre_signal.cache import clear_cache
 
 
 @pytest.fixture(autouse=True)

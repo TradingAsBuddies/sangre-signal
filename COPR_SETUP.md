@@ -1,6 +1,6 @@
 # COPR Setup and Build Guide
 
-Quick guide to build Super Signal on COPR for easy Fedora installation.
+Quick guide to build Sangre Signal on COPR for easy Fedora installation.
 
 ## Prerequisites
 
@@ -26,13 +26,13 @@ copr_url = https://copr.fedorainfracloud.org
 
 ```bash
 # Create the repository (only need to do this once)
-copr-cli create super-signal \
+copr-cli create sangre-signal \
     --chroot fedora-39-x86_64 \
     --chroot fedora-40-x86_64 \
     --chroot fedora-41-x86_64 \
     --chroot fedora-rawhide-x86_64 \
-    --description "Super Signal - Advanced stock analysis tool with risk factor detection" \
-    --instructions "Installation: sudo dnf copr enable tradingasbuddies/super-signal && sudo dnf install super-signal"
+    --description "Sangre Signal - Advanced stock analysis tool with risk factor detection" \
+    --instructions "Installation: sudo dnf copr enable tradingasbuddies/sangre-signal && sudo dnf install sangre-signal"
 ```
 
 ## Build from GitHub
@@ -40,9 +40,9 @@ copr-cli create super-signal \
 ### Option 1: Build from Latest Commit
 
 ```bash
-copr-cli buildscm super-signal \
-    --clone-url https://github.com/TradingAsBuddies/super-signal \
-    --spec super-signal.spec \
+copr-cli buildscm sangre-signal \
+    --clone-url https://github.com/TradingAsBuddies/sangre-signal \
+    --spec sangre-signal.spec \
     --type git \
     --method make_srpm
 ```
@@ -50,10 +50,10 @@ copr-cli buildscm super-signal \
 ### Option 2: Build from Specific Tag/Release
 
 ```bash
-copr-cli buildscm super-signal \
-    --clone-url https://github.com/TradingAsBuddies/super-signal \
+copr-cli buildscm sangre-signal \
+    --clone-url https://github.com/TradingAsBuddies/sangre-signal \
     --committish v2.0.0 \
-    --spec super-signal.spec \
+    --spec sangre-signal.spec \
     --type git \
     --method make_srpm
 ```
@@ -62,7 +62,7 @@ copr-cli buildscm super-signal \
 
 ```bash
 # Check build status
-copr-cli list-builds super-signal
+copr-cli list-builds sangre-signal
 
 # Watch build log
 copr-cli watch-build BUILD_ID
@@ -74,21 +74,21 @@ Once the build completes:
 
 ```bash
 # Enable the repository
-sudo dnf copr enable tradingasbuddies/super-signal
+sudo dnf copr enable tradingasbuddies/sangre-signal
 
 # Install the package
-sudo dnf install super-signal
+sudo dnf install sangre-signal
 
 # Test it
-super-signal --ticker AAPL
+sangre-signal --ticker AAPL
 ```
 
 ## Updating for New Releases
 
 When you push a new version:
 
-1. Update version in `pyproject.toml` and `super_signal/__init__.py`
-2. Update `super-signal.spec`:
+1. Update version in `pyproject.toml` and `sangre_signal/__init__.py`
+2. Update `sangre-signal.spec`:
    - Bump `Version:`
    - Reset `Release:` to 1
    - Add changelog entry
@@ -101,10 +101,10 @@ When you push a new version:
    ```
 4. Rebuild on COPR:
    ```bash
-   copr-cli buildscm super-signal \
-       --clone-url https://github.com/TradingAsBuddies/super-signal \
+   copr-cli buildscm sangre-signal \
+       --clone-url https://github.com/TradingAsBuddies/sangre-signal \
        --committish v2.1.0 \
-       --spec super-signal.spec \
+       --spec sangre-signal.spec \
        --type git \
        --method make_srpm
    ```
@@ -113,7 +113,7 @@ When you push a new version:
 
 You can set up webhooks to auto-rebuild on git push:
 
-1. Go to: https://copr.fedorainfracloud.org/coprs/tradingasbuddies/super-signal/settings/
+1. Go to: https://copr.fedorainfracloud.org/coprs/tradingasbuddies/sangre-signal/settings/
 2. Enable "Build on push"
 3. Add GitHub webhook URL to your repository
 
@@ -123,13 +123,13 @@ Once built, users can install with:
 
 ```bash
 # Enable repository
-sudo dnf copr enable tradingasbuddies/super-signal
+sudo dnf copr enable tradingasbuddies/sangre-signal
 
 # Install
-sudo dnf install super-signal
+sudo dnf install sangre-signal
 ```
 
-Repository URL: https://copr.fedorainfracloud.org/coprs/tradingasbuddies/super-signal/
+Repository URL: https://copr.fedorainfracloud.org/coprs/tradingasbuddies/sangre-signal/
 
 ## Troubleshooting
 
@@ -156,7 +156,7 @@ If a Python dependency isn't in Fedora repos:
 
 Make sure repository is public:
 ```bash
-copr-cli modify super-signal --unlisted-on-hp off
+copr-cli modify sangre-signal --unlisted-on-hp off
 ```
 
 ## COPR Badge for README
@@ -164,7 +164,7 @@ copr-cli modify super-signal --unlisted-on-hp off
 Once built, add this badge to README.md:
 
 ```markdown
-[![COPR](https://copr.fedorainfracloud.org/coprs/tradingasbuddies/super-signal/package/super-signal/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/tradingasbuddies/super-signal/)
+[![COPR](https://copr.fedorainfracloud.org/coprs/tradingasbuddies/sangre-signal/package/sangre-signal/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/tradingasbuddies/sangre-signal/)
 ```
 
 ## Useful Commands
@@ -174,7 +174,7 @@ Once built, add this badge to README.md:
 copr-cli list
 
 # Get package info
-copr-cli get-package super-signal --name super-signal
+copr-cli get-package sangre-signal --name sangre-signal
 
 # Delete a build (if needed)
 copr-cli delete-build BUILD_ID
