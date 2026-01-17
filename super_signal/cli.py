@@ -7,6 +7,7 @@ with colored terminal output.
 import os
 import sys
 import logging
+import time
 from dataclasses import dataclass
 from typing import Optional, List
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -217,15 +218,17 @@ def run_for_tickers(
     tickers: List[str],
     output_format: str = "text",
     language: str = "en",
-    max_workers: int = 10
+    max_workers: int = 3
 ) -> bool:
     """Run stock screening for multiple tickers.
+
+    Uses sequential processing with delays to avoid Yahoo Finance rate limiting.
 
     Args:
         tickers: List of stock ticker symbols to screen
         output_format: Output format ('text', 'json', 'csv', or 'claude')
         language: Output language ('en' or 'es') for Claude format
-        max_workers: Maximum number of concurrent fetches
+        max_workers: Maximum number of concurrent fetches (reduced to avoid rate limits)
 
     Returns:
         True if at least one ticker succeeded, False if all failed
@@ -244,29 +247,21 @@ def run_for_tickers(
         # Fetch VIX once before processing tickers
         vix_value = fetch_vix()
 
-        # Fetch ticker data in parallel, preserving order
+        # Process tickers sequentially with delay to avoid rate limiting
+        # This is more reliable than parallel fetching for Yahoo Finance
         results: List[TickerResult] = []
-        ticker_to_index = {t: i for i, t in enumerate(tickers)}
 
-        with ThreadPoolExecutor(max_workers=min(max_workers, len(tickers))) as executor:
-            future_to_ticker = {
-                executor.submit(fetch_ticker_data, ticker): ticker
-                for ticker in tickers
-            }
+        for i, ticker in enumerate(tickers):
+            # Add delay between requests to avoid rate limiting (except first)
+            if i > 0:
+                time.sleep(0.5)  # 500ms delay between requests
 
-            # Collect results as they complete
-            result_map = {}
-            for future in as_completed(future_to_ticker):
-                ticker = future_to_ticker[future]
-                try:
-                    result = future.result()
-                    result_map[ticker] = result
-                except Exception as e:
-                    logger.exception(f"Unexpected error processing {ticker}")
-                    result_map[ticker] = TickerResult(ticker=ticker, error=str(e))
+            result = fetch_ticker_data(ticker)
+            results.append(result)
 
-        # Reorder results to match original ticker order
-        results = [result_map[t] for t in tickers]
+            # Log progress for large batches
+            if len(tickers) > 5:
+                logger.info(f"Processed {i + 1}/{len(tickers)}: {ticker}")
 
         # Format and display results using batch formatter
         formatter = get_formatter(output_format, language=language)
