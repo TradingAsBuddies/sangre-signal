@@ -6,6 +6,7 @@ using Claude AI, with support for English and Spanish output.
 
 import logging
 import re
+import sys
 from datetime import datetime
 from typing import Optional, List, Literal, TYPE_CHECKING
 from zoneinfo import ZoneInfo
@@ -40,6 +41,60 @@ def _strip_emojis(text: str) -> str:
         flags=re.UNICODE
     )
     return emoji_pattern.sub('', text)
+
+
+def _safe_encode_for_console(text: str) -> str:
+    """Safely encode text for Windows console, transliterating Spanish accents if needed.
+
+    On Windows with legacy console encoding (cp1252, etc.), Spanish accented characters
+    often don't display correctly due to encoding mismatches between UTF-8 and the
+    console. This function always transliterates accented characters on Windows
+    for reliable display.
+    """
+    # Spanish character transliteration map
+    SPANISH_TRANSLITERATION = {
+        'á': 'a', 'Á': 'A',
+        'é': 'e', 'É': 'E',
+        'í': 'i', 'Í': 'I',
+        'ó': 'o', 'Ó': 'O',
+        'ú': 'u', 'Ú': 'U',
+        'ü': 'u', 'Ü': 'U',
+        'ñ': 'n', 'Ñ': 'N',
+        '¿': '?', '¡': '!',
+        '–': '-', '—': '-',
+        '"': '"', '"': '"',
+        ''': "'", ''': "'",
+        '…': '...',
+        '•': '-', '·': '-',  # Bullet points
+        '→': '->', '←': '<-',  # Arrows
+        '×': 'x', '÷': '/',  # Math symbols
+    }
+
+    # Check if we're on Windows (non-UTF-8 console likely)
+    is_windows = sys.platform == 'win32'
+    encoding = (sys.stdout.encoding or 'utf-8').lower().replace('-', '')
+    is_utf8 = encoding in ('utf8', 'utf16', 'utf32')
+
+    # On Windows with non-UTF-8 encoding, always transliterate
+    if is_windows and not is_utf8:
+        result = []
+        for char in text:
+            if char in SPANISH_TRANSLITERATION:
+                result.append(SPANISH_TRANSLITERATION[char])
+            else:
+                # Keep ASCII and basic Latin characters
+                if ord(char) < 128:
+                    result.append(char)
+                else:
+                    # Try to keep the character, fall back to ?
+                    try:
+                        char.encode('cp1252')
+                        result.append(char)
+                    except (UnicodeEncodeError, LookupError):
+                        result.append('?')
+        return ''.join(result)
+
+    return text
 
 
 # Bilingual prompts and templates
@@ -282,8 +337,9 @@ class ClaudeFormatter(BaseFormatter):
             ]
         )
 
-        # Strip emojis for Windows console compatibility
-        return _strip_emojis(message.content[0].text)
+        # Strip emojis and handle Windows console encoding
+        text = _strip_emojis(message.content[0].text)
+        return _safe_encode_for_console(text)
 
     def _format_fallback(
         self,
@@ -321,7 +377,7 @@ class ClaudeFormatter(BaseFormatter):
             lines.append(self._build_risk_flags_text(risk_analysis))
 
         lines.append(f"\n{divider}")
-        return "\n".join(lines)
+        return _safe_encode_for_console("\n".join(lines))
 
     def format(
         self,
@@ -364,7 +420,7 @@ class ClaudeFormatter(BaseFormatter):
                 header = f"{divider}\n  {stock_info.ticker} ANALYSIS (Powered by Claude AI)  \n{divider}"
                 footer = f"\n{divider}\nGenerated: {timestamp}\n{divider}"
 
-            return f"{header}\n\n{analysis}{footer}"
+            return _safe_encode_for_console(f"{header}\n\n{analysis}{footer}")
 
         except Exception as e:
             logger.error(f"Claude API error for {stock_info.ticker}: {e}")
@@ -451,7 +507,7 @@ class ClaudeFormatter(BaseFormatter):
         else:
             header = f"{divider}\n  PORTFOLIO SUMMARY  \n{divider}"
 
-        return f"{header}\n\n{summary}\n{divider}"
+        return _safe_encode_for_console(f"{header}\n\n{summary}\n{divider}")
 
     def format_error(self, ticker: str, error: Optional[str]) -> str:
         """Format an error result for a ticker.
@@ -464,5 +520,5 @@ class ClaudeFormatter(BaseFormatter):
             Formatted error string
         """
         if self.language == "es":
-            return f"Error para {ticker}: {error or 'Error desconocido'}"
+            return _safe_encode_for_console(f"Error para {ticker}: {error or 'Error desconocido'}")
         return f"Error for {ticker}: {error or 'Unknown error'}"
