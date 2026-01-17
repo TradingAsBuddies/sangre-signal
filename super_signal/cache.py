@@ -1,41 +1,60 @@
-"""In-memory SQLite cache for stock data.
+"""Persistent SQLite cache for stock data with rate limiting.
 
-This module provides a caching layer using SQLite in-memory database
-to minimize repeated API/HTTP requests for the same ticker.
+This module provides a caching layer using SQLite file-based database
+to minimize repeated API/HTTP requests for the same ticker across sessions.
+Also includes rate limiting to avoid Yahoo Finance API throttling.
 """
 
 import json
 import logging
 import sqlite3
 import time
+import os
 from dataclasses import asdict
+from pathlib import Path
 from typing import Optional, List, Tuple
 
 from .models import StockInfo
 
 logger = logging.getLogger("super_signal.cache")
 
-# Default cache TTL in seconds (1 hour)
-DEFAULT_TTL = 3600
+# Default cache TTL in seconds (4 hours - stock data doesn't change frequently)
+DEFAULT_TTL = 4 * 3600
+
+# Rate limiting settings
+RATE_LIMIT_WINDOW = 3600  # 1 hour window
+RATE_LIMIT_MAX_REQUESTS = 80  # Max requests per hour (conservative limit)
+
+# Cache file location
+def _get_cache_path() -> str:
+    """Get the path for the cache database file."""
+    # Use user's home directory for cache
+    cache_dir = Path.home() / ".cache" / "sangre-signal"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    return str(cache_dir / "stock_cache.db")
 
 
 class StockCache:
-    """In-memory SQLite cache for stock data.
+    """Persistent SQLite cache for stock data with rate limiting.
 
     Caches stock info, ADR status, and directors to avoid repeated
-    network requests for the same ticker within a session.
+    network requests for the same ticker. Persists data across sessions
+    and includes rate limiting to prevent API throttling.
     """
 
-    def __init__(self, ttl: int = DEFAULT_TTL):
-        """Initialize the in-memory cache.
+    def __init__(self, ttl: int = DEFAULT_TTL, db_path: str = None):
+        """Initialize the persistent cache.
 
         Args:
-            ttl: Time-to-live for cache entries in seconds (default: 1 hour)
+            ttl: Time-to-live for cache entries in seconds (default: 4 hours)
+            db_path: Path to SQLite database file (default: ~/.cache/sangre-signal/)
         """
         self.ttl = ttl
-        self.conn = sqlite3.connect(":memory:", check_same_thread=False)
+        self.db_path = db_path or _get_cache_path()
+        self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
         self._create_tables()
-        logger.info("Initialized in-memory stock cache")
+        self._cleanup_old_entries()
+        logger.info(f"Initialized persistent stock cache at {self.db_path}")
 
     def _create_tables(self) -> None:
         """Create the cache tables."""
@@ -68,8 +87,45 @@ class StockCache:
             )
         """)
 
+        # Rate limiting table - tracks API requests
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS rate_limit (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                request_time REAL NOT NULL,
+                endpoint TEXT DEFAULT 'yahoo'
+            )
+        """)
+
+        # Create index for faster rate limit queries
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_rate_limit_time
+            ON rate_limit(request_time)
+        """)
+
         self.conn.commit()
         logger.debug("Cache tables created")
+
+    def _cleanup_old_entries(self) -> None:
+        """Clean up expired cache entries and old rate limit records."""
+        cursor = self.conn.cursor()
+        now = time.time()
+        cutoff = now - self.ttl
+
+        # Clean up expired stock info
+        cursor.execute("DELETE FROM stock_info WHERE cached_at < ?", (cutoff,))
+
+        # Clean up expired ADR status
+        cursor.execute("DELETE FROM adr_status WHERE cached_at < ?", (cutoff,))
+
+        # Clean up expired directors
+        cursor.execute("DELETE FROM directors WHERE cached_at < ?", (cutoff,))
+
+        # Clean up old rate limit records (older than 1 hour)
+        rate_cutoff = now - RATE_LIMIT_WINDOW
+        cursor.execute("DELETE FROM rate_limit WHERE request_time < ?", (rate_cutoff,))
+
+        self.conn.commit()
+        logger.debug("Cleaned up expired cache entries")
 
     def _is_expired(self, cached_at: float) -> bool:
         """Check if a cache entry has expired.
@@ -269,14 +325,121 @@ class StockCache:
         cursor.execute("DELETE FROM directors WHERE ticker = ?", (ticker,))
         self.conn.commit()
 
+    # --- Rate Limiting Methods ---
+
+    def record_request(self, endpoint: str = "yahoo") -> None:
+        """Record an API request for rate limiting.
+
+        Args:
+            endpoint: API endpoint identifier (default: 'yahoo')
+        """
+        cursor = self.conn.cursor()
+        cursor.execute(
+            "INSERT INTO rate_limit (request_time, endpoint) VALUES (?, ?)",
+            (time.time(), endpoint)
+        )
+        self.conn.commit()
+
+    def get_request_count(self, endpoint: str = "yahoo") -> int:
+        """Get the number of requests made in the current rate limit window.
+
+        Args:
+            endpoint: API endpoint identifier (default: 'yahoo')
+
+        Returns:
+            Number of requests made in the last hour
+        """
+        cursor = self.conn.cursor()
+        cutoff = time.time() - RATE_LIMIT_WINDOW
+        cursor.execute(
+            "SELECT COUNT(*) FROM rate_limit WHERE request_time > ? AND endpoint = ?",
+            (cutoff, endpoint)
+        )
+        return cursor.fetchone()[0]
+
+    def is_rate_limited(self, endpoint: str = "yahoo") -> bool:
+        """Check if we've exceeded the rate limit.
+
+        Args:
+            endpoint: API endpoint identifier (default: 'yahoo')
+
+        Returns:
+            True if rate limited, False otherwise
+        """
+        count = self.get_request_count(endpoint)
+        is_limited = count >= RATE_LIMIT_MAX_REQUESTS
+        if is_limited:
+            logger.warning(
+                f"Rate limit reached: {count}/{RATE_LIMIT_MAX_REQUESTS} requests "
+                f"in the last hour for {endpoint}"
+            )
+        return is_limited
+
+    def get_rate_limit_reset_time(self, endpoint: str = "yahoo") -> Optional[float]:
+        """Get the time until rate limit resets (oldest request expires).
+
+        Args:
+            endpoint: API endpoint identifier (default: 'yahoo')
+
+        Returns:
+            Seconds until rate limit resets, or None if not rate limited
+        """
+        if not self.is_rate_limited(endpoint):
+            return None
+
+        cursor = self.conn.cursor()
+        cutoff = time.time() - RATE_LIMIT_WINDOW
+        cursor.execute(
+            "SELECT MIN(request_time) FROM rate_limit WHERE request_time > ? AND endpoint = ?",
+            (cutoff, endpoint)
+        )
+        oldest = cursor.fetchone()[0]
+        if oldest:
+            reset_time = oldest + RATE_LIMIT_WINDOW - time.time()
+            return max(0, reset_time)
+        return None
+
+    def get_rate_limit_status(self, endpoint: str = "yahoo") -> dict:
+        """Get current rate limit status.
+
+        Args:
+            endpoint: API endpoint identifier (default: 'yahoo')
+
+        Returns:
+            Dict with 'requests_made', 'requests_remaining', 'is_limited', 'reset_in_seconds'
+        """
+        count = self.get_request_count(endpoint)
+        remaining = max(0, RATE_LIMIT_MAX_REQUESTS - count)
+        is_limited = count >= RATE_LIMIT_MAX_REQUESTS
+        reset_time = self.get_rate_limit_reset_time(endpoint) if is_limited else None
+
+        return {
+            "requests_made": count,
+            "requests_remaining": remaining,
+            "max_requests": RATE_LIMIT_MAX_REQUESTS,
+            "is_limited": is_limited,
+            "reset_in_seconds": reset_time,
+            "window_seconds": RATE_LIMIT_WINDOW,
+        }
+
     def clear(self) -> None:
-        """Clear all cached data."""
+        """Clear all cached data (but preserve rate limit records)."""
         cursor = self.conn.cursor()
         cursor.execute("DELETE FROM stock_info")
         cursor.execute("DELETE FROM adr_status")
         cursor.execute("DELETE FROM directors")
         self.conn.commit()
         logger.info("Cache cleared")
+
+    def clear_all(self) -> None:
+        """Clear all data including rate limit records."""
+        cursor = self.conn.cursor()
+        cursor.execute("DELETE FROM stock_info")
+        cursor.execute("DELETE FROM adr_status")
+        cursor.execute("DELETE FROM directors")
+        cursor.execute("DELETE FROM rate_limit")
+        self.conn.commit()
+        logger.info("All cache and rate limit data cleared")
 
     def close(self) -> None:
         """Close the database connection."""

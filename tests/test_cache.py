@@ -19,9 +19,9 @@ class TestStockCacheInitialization:
         cache.close()
 
     def test_cache_default_ttl(self):
-        """Test that cache has default TTL of 1 hour."""
+        """Test that cache has default TTL of 4 hours."""
         cache = StockCache()
-        assert cache.ttl == 3600
+        assert cache.ttl == 4 * 3600  # 4 hours
         cache.close()
 
     def test_cache_custom_ttl(self):

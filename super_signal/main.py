@@ -64,7 +64,41 @@ def parse_arguments():
         help="Set logging level (default: INFO)"
     )
 
+    parser.add_argument(
+        "--status",
+        action="store_true",
+        help="Show rate limit and cache status, then exit"
+    )
+
+    parser.add_argument(
+        "--clear-cache",
+        action="store_true",
+        help="Clear the cache and exit"
+    )
+
     return parser.parse_args()
+
+
+def show_status():
+    """Display rate limit and cache status."""
+    from .cache import get_cache
+
+    cache = get_cache()
+    status = cache.get_rate_limit_status()
+
+    print("=== Rate Limit Status ===")
+    print(f"Requests made (last hour): {status['requests_made']}/{status['max_requests']}")
+    print(f"Requests remaining: {status['requests_remaining']}")
+
+    if status['is_limited']:
+        reset_min = status['reset_in_seconds'] / 60 if status['reset_in_seconds'] else 0
+        print(f"Status: RATE LIMITED (resets in {reset_min:.1f} minutes)")
+    else:
+        print("Status: OK")
+
+    print(f"\n=== Cache Info ===")
+    print(f"Cache location: {cache.db_path}")
+    print(f"Cache TTL: {cache.ttl / 3600:.1f} hours")
 
 
 def main():
@@ -74,6 +108,18 @@ def main():
 
     # Set up logging
     setup_logging()
+
+    # Handle status and clear-cache commands
+    if args.status:
+        show_status()
+        sys.exit(0)
+
+    if args.clear_cache:
+        from .cache import get_cache
+        cache = get_cache()
+        cache.clear_all()
+        print("Cache cleared successfully.")
+        sys.exit(0)
 
     # Launch CLI interface
     try:

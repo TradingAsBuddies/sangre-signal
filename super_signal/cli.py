@@ -254,13 +254,13 @@ def run_for_tickers(
         for i, ticker in enumerate(tickers):
             # Add delay between requests to avoid rate limiting (except first)
             if i > 0:
-                time.sleep(0.5)  # 500ms delay between requests
+                time.sleep(1.5)  # 1.5 second delay between requests
 
             result = fetch_ticker_data(ticker)
             results.append(result)
 
             # Log progress for large batches
-            if len(tickers) > 5:
+            if len(tickers) > 3:
                 logger.info(f"Processed {i + 1}/{len(tickers)}: {ticker}")
 
         # Format and display results using batch formatter

@@ -92,6 +92,16 @@ def retry_with_backoff(
     return decorator
 
 
+class RateLimitExceeded(Exception):
+    """Exception raised when rate limit is exceeded."""
+    def __init__(self, reset_time: float = None):
+        self.reset_time = reset_time
+        if reset_time:
+            super().__init__(f"Rate limit exceeded. Resets in {reset_time:.0f} seconds.")
+        else:
+            super().__init__("Rate limit exceeded.")
+
+
 @retry_with_backoff(max_retries=3, base_delay=2.0, max_delay=30.0)
 def _fetch_ticker_info(ticker: str) -> dict:
     """Internal function to fetch ticker info with retry logic.
@@ -100,11 +110,25 @@ def _fetch_ticker_info(ticker: str) -> dict:
         ticker: Stock ticker symbol
 
     Returns:
-        Info dictionary from yfinance
+        Tuple of (info dict, yfinance Ticker object)
 
     Raises:
-        Exception on failure after retries
+        RateLimitExceeded: When local rate limit is exceeded
+        Exception: On failure after retries
     """
+    cache = get_cache()
+
+    # Check local rate limit before making request
+    if cache.is_rate_limited():
+        reset_time = cache.get_rate_limit_reset_time()
+        raise RateLimitExceeded(reset_time)
+
+    # Record the request
+    cache.record_request()
+
+    # Add a small delay to be respectful to the API
+    time.sleep(0.3)
+
     stock = yf.Ticker(ticker)
     info = stock.info
 
@@ -198,6 +222,12 @@ def fetch_stock_info(ticker: str) -> Optional[StockInfo]:
         cache.set_stock_info(stock_info)
 
         return stock_info
+
+    except RateLimitExceeded as e:
+        logger.error(
+            f"Local rate limit exceeded for {ticker}. {e}"
+        )
+        return None
 
     except Exception as e:
         error_str = str(e).lower()
@@ -361,6 +391,19 @@ def get_last_split_details(ticker_obj: yf.Ticker, info: dict) -> str:
 @retry_with_backoff(max_retries=2, base_delay=1.0, max_delay=10.0)
 def _fetch_vix_info() -> dict:
     """Internal function to fetch VIX info with retry logic."""
+    cache = get_cache()
+
+    # Check local rate limit before making request
+    if cache.is_rate_limited():
+        reset_time = cache.get_rate_limit_reset_time()
+        raise RateLimitExceeded(reset_time)
+
+    # Record the request
+    cache.record_request()
+
+    # Add a small delay
+    time.sleep(0.3)
+
     vix = yf.Ticker("^VIX")
     info = vix.info
     if not info:
