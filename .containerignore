@@ -1,0 +1,44 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.egg-info
+dist/
+build/
+venv/
+.venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs and caches
+*.log
+.pytest_cache/
+.coverage
+htmlcov/
+.yf_cache/
+
+# Environment files (API keys should be passed at runtime)
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation (not needed in container)
+*.md
+!README.md
+
+# Tests (not needed in production container)
+tests/
+
+# Local settings
+.claude/
