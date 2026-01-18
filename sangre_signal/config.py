@@ -226,3 +226,28 @@ class ClaudeConfig:
 
 
 CLAUDE_CONFIG = ClaudeConfig()
+
+
+# --- Perplexity AI Configuration ---
+
+@dataclass
+class PerplexityConfig:
+    """Perplexity AI integration configuration.
+
+    Attributes:
+        api_key: Perplexity API key (loaded from PERPLEXITY_API_KEY env var or .env file)
+        model: Perplexity model to use for analysis
+        max_tokens: Maximum tokens for response
+        language: Output language ("en" for English, "es" for Spanish)
+    """
+    api_key: str = field(default_factory=lambda: os.environ.get("PERPLEXITY_API_KEY", ""))
+    model: str = "sonar-pro"
+    max_tokens: int = 2000
+    language: Literal["en", "es"] = "en"
+
+    def is_configured(self) -> bool:
+        """Check if Perplexity API is properly configured."""
+        return bool(self.api_key)
+
+
+PERPLEXITY_CONFIG = PerplexityConfig()

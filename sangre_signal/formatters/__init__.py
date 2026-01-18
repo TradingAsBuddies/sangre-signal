@@ -30,6 +30,7 @@ from .text_formatter import TextFormatter
 from .json_formatter import JsonFormatter
 from .csv_formatter import CsvFormatter
 from .claude_formatter import ClaudeFormatter
+from .perplexity_formatter import PerplexityFormatter
 
 __all__ = [
     # Display functions
@@ -59,4 +60,5 @@ __all__ = [
     "JsonFormatter",
     "CsvFormatter",
     "ClaudeFormatter",
+    "PerplexityFormatter",
 ]

@@ -90,8 +90,8 @@ def get_formatter(format_type: str, language: str = "en") -> BaseFormatter:
     """Factory function to get the appropriate formatter.
 
     Args:
-        format_type: Output format type ('text', 'json', 'csv', or 'claude')
-        language: Language for output ('en' or 'es'). Only applies to claude format.
+        format_type: Output format type ('text', 'json', 'csv', 'claude', or 'perplexity')
+        language: Language for output ('en' or 'es'). Only applies to AI formats.
 
     Returns:
         Formatter instance for the specified format
@@ -103,10 +103,13 @@ def get_formatter(format_type: str, language: str = "en") -> BaseFormatter:
     from .json_formatter import JsonFormatter
     from .csv_formatter import CsvFormatter
     from .claude_formatter import ClaudeFormatter
+    from .perplexity_formatter import PerplexityFormatter
 
-    # Claude formatter needs special handling for language parameter
+    # AI formatters need special handling for language parameter
     if format_type == 'claude':
         return ClaudeFormatter(language=language)
+    if format_type == 'perplexity':
+        return PerplexityFormatter(language=language)
 
     formatters = {
         'text': TextFormatter,
@@ -115,7 +118,7 @@ def get_formatter(format_type: str, language: str = "en") -> BaseFormatter:
     }
 
     if format_type not in formatters:
-        valid_formats = ', '.join(sorted(list(formatters.keys()) + ['claude']))
+        valid_formats = ', '.join(sorted(list(formatters.keys()) + ['claude', 'perplexity']))
         raise ValueError(
             f"Unsupported format: '{format_type}'. "
             f"Valid formats are: {valid_formats}"

@@ -19,5 +19,8 @@ tzdata>=2023.3
 # Anthropic Claude API client (for AI-powered analysis formatting)
 anthropic>=0.39.0
 
+# OpenAI-compatible client (for Perplexity AI-powered analysis formatting)
+openai>=1.0.0
+
 # Environment variable management from .env files
 python-dotenv>=1.0.0
