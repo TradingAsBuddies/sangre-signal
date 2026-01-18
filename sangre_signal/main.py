@@ -42,9 +42,9 @@ def parse_arguments():
     parser.add_argument(
         "--format",
         "-f",
-        choices=["text", "json", "csv", "claude"],
+        choices=["text", "json", "csv", "claude", "perplexity"],
         default="text",
-        help="Output format: text (colored terminal), json, csv, or claude "
+        help="Output format: text (colored terminal), json, csv, claude, or perplexity "
              "(AI-powered analysis with risk explanations) (default: text)"
     )
 
@@ -53,7 +53,7 @@ def parse_arguments():
         "-L",
         choices=["en", "es"],
         default="en",
-        help="Output language for Claude format: en (English) or es (Spanish) (default: en)"
+        help="Output language for AI formats (claude/perplexity): en (English) or es (Spanish) (default: en)"
     )
 
     parser.add_argument(
