@@ -36,3 +36,6 @@ htmlcov/
 
 # Local settings
 .claude/
+
+# Cache directories
+.yf_cache/
