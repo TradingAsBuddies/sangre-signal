@@ -3,16 +3,16 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
-A comprehensive stock analysis application that analyzes stocks for various risk factors including country of origin, ADR status, low float, and more. Now with **Claude AI-powered analysis** for plain-language risk explanations in English and Spanish.
+A comprehensive stock analysis application that analyzes stocks for various risk factors including country of origin, ADR status, low float, and more. Now with **AI-powered analysis** using Claude or Perplexity for plain-language risk explanations in English and Spanish.
 
 ## Features
 
 - Real-time stock data from Yahoo Finance
 - Multi-factor risk analysis (country, ADR status, float, headquarters)
-- **Claude AI-powered analysis** with plain-language risk explanations
+- **AI-powered analysis** with Claude or Perplexity
 - **Bilingual support** - English and Spanish (Mexican) output
 - Portfolio-level analysis for multiple stocks
-- Multiple output formats: text, JSON, CSV, and Claude AI
+- Multiple output formats: text, JSON, CSV, Claude AI, and Perplexity AI
 - Colorful terminal output with ANSI colors
 - Automatic logging to file
 - Modular, extensible architecture
@@ -41,18 +41,24 @@ pip install -r requirements.txt
 
 ### Configuration
 
-Copy the example environment file and add your Anthropic API key:
+Copy the example environment file and add your API keys:
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` and add your API key:
-```
+Edit `.env` and add your API key(s):
+```bash
+# For Claude AI analysis
 ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
+
+# For Perplexity AI analysis
+PERPLEXITY_API_KEY=pplx-your-key-here
 ```
 
-Get your API key at: https://console.anthropic.com/
+Get your API keys at:
+- Claude: https://console.anthropic.com/
+- Perplexity: https://www.perplexity.ai/settings/api
 
 ## Quick Start
 
@@ -67,28 +73,40 @@ python -m sangre_signal -t AAPL,TSLA,MSFT
 python -m sangre_signal
 ```
 
-## Claude AI Analysis
+## AI-Powered Analysis
 
-The Claude AI format provides natural language explanations of stock risks that anyone can understand.
+Both Claude and Perplexity AI formats provide natural language explanations of stock risks that anyone can understand.
 
-### English Analysis
+### Claude AI Analysis
 
 ```bash
+# English
 python -m sangre_signal -t AAPL -f claude
+
+# Spanish (Mexican Spanish)
+python -m sangre_signal -t AAPL -f claude -L es
 ```
 
-### Spanish Analysis (Mexican Spanish)
+### Perplexity AI Analysis
 
 ```bash
-python -m sangre_signal -t AAPL -f claude -L es
+# English
+python -m sangre_signal -t AAPL -f perplexity
+
+# Spanish (Mexican Spanish)
+python -m sangre_signal -t AAPL -f perplexity -L es
 ```
 
 ### Portfolio Analysis
 
-When analyzing multiple stocks with Claude, you get individual analyses plus a consolidated portfolio summary:
+When analyzing multiple stocks with either AI provider, you get individual analyses plus a consolidated portfolio summary:
 
 ```bash
+# With Claude
 python -m sangre_signal -t AAPL,TSLA,BABA -f claude
+
+# With Perplexity
+python -m sangre_signal -t AAPL,TSLA,BABA -f perplexity
 ```
 
 This provides:
@@ -143,8 +161,12 @@ python -m sangre_signal -t AAPL -f csv
 # Claude - AI-powered analysis
 python -m sangre_signal -t AAPL -f claude
 
-# Claude in Spanish
+# Perplexity - AI-powered analysis
+python -m sangre_signal -t AAPL -f perplexity
+
+# AI formats in Spanish
 python -m sangre_signal -t AAPL -f claude -L es
+python -m sangre_signal -t AAPL -f perplexity -L es
 ```
 
 ## Cache and Rate Limiting
@@ -204,8 +226,11 @@ The screener analyzes stocks for the following risk factors:
 Create a `.env` file in the project root:
 
 ```bash
-# Required for Claude AI analysis
+# For Claude AI analysis
 ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
+
+# For Perplexity AI analysis
+PERPLEXITY_API_KEY=pplx-your-key-here
 ```
 
 ### Risk Thresholds
@@ -240,11 +265,12 @@ sangre-signal/
 │   ├── analyzers/
 │   │   └── risk_analyzer.py  # Risk detection
 │   └── formatters/
-│       ├── base.py           # Formatter base class
-│       ├── text_formatter.py # Colored terminal output
-│       ├── json_formatter.py # JSON output
-│       ├── csv_formatter.py  # CSV output
-│       └── claude_formatter.py # Claude AI analysis
+│       ├── base.py              # Formatter base class
+│       ├── text_formatter.py    # Colored terminal output
+│       ├── json_formatter.py    # JSON output
+│       ├── csv_formatter.py     # CSV output
+│       ├── claude_formatter.py  # Claude AI analysis
+│       └── perplexity_formatter.py # Perplexity AI analysis
 └── tests/
 ```
 
@@ -252,7 +278,7 @@ sangre-signal/
 
 - Python 3.10 or higher
 - Internet connection
-- Anthropic API key (for Claude AI features)
+- Anthropic API key (for Claude AI features) and/or Perplexity API key (for Perplexity AI features)
 
 ### Dependencies
 
@@ -261,6 +287,7 @@ sangre-signal/
 - beautifulsoup4 - Web scraping
 - lxml - HTML parsing
 - anthropic - Claude AI API
+- openai - Perplexity AI API (OpenAI-compatible)
 - python-dotenv - Environment variable management
 
 ## Troubleshooting
@@ -272,6 +299,14 @@ If you see "AI analysis unavailable - ANTHROPIC_API_KEY not set":
 1. Make sure you have a `.env` file in the project root
 2. Verify your API key is correct
 3. Check that python-dotenv is installed: `pip install python-dotenv`
+
+### Perplexity Analysis Shows Fallback Message
+
+If you see "AI analysis unavailable - PERPLEXITY_API_KEY not set":
+
+1. Make sure you have a `.env` file in the project root
+2. Add your Perplexity API key: `PERPLEXITY_API_KEY=pplx-your-key-here`
+3. Get your API key at: https://www.perplexity.ai/settings/api
 
 ### No Data for Ticker
 
@@ -306,5 +341,5 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 - Built with [yfinance](https://github.com/ranaroussi/yfinance) for Yahoo Finance data
 - Web scraping powered by [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/)
-- AI analysis powered by [Claude](https://www.anthropic.com/claude) from Anthropic
+- AI analysis powered by [Claude](https://www.anthropic.com/claude) from Anthropic and [Perplexity AI](https://www.perplexity.ai/)
 - Developed with assistance from [Claude Code](https://claude.ai/code)
