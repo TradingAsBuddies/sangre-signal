@@ -142,10 +142,22 @@ FIELD_LABELS = {
 
 # --- Logging Configuration ---
 
+def _get_log_file_path() -> str:
+    """Get a writable path for the log file."""
+    # Try user's cache directory first (works in containers)
+    cache_dir = Path.home() / ".cache" / "sangre-signal"
+    try:
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        return str(cache_dir / "sangre_signal.log")
+    except (PermissionError, OSError):
+        # Fall back to current directory
+        return "sangre_signal.log"
+
+
 @dataclass
 class LoggingConfig:
     """Logging configuration for the application."""
-    log_file: str = "sangre_signal.log"
+    log_file: str = field(default_factory=_get_log_file_path)
     log_level: int = logging.INFO
     console_log_level: int = logging.WARNING
     log_format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -161,11 +173,16 @@ def setup_logging(config: LoggingConfig = LOGGING_CONFIG) -> None:
     logger.setLevel(config.log_level)
     logger.handlers.clear()
 
-    file_handler = logging.FileHandler(config.log_file)
-    file_handler.setLevel(config.log_level)
-    file_formatter = logging.Formatter(config.log_format, config.date_format)
-    file_handler.setFormatter(file_formatter)
-    logger.addHandler(file_handler)
+    # Try to set up file handler, skip if not writable
+    try:
+        file_handler = logging.FileHandler(config.log_file)
+        file_handler.setLevel(config.log_level)
+        file_formatter = logging.Formatter(config.log_format, config.date_format)
+        file_handler.setFormatter(file_formatter)
+        logger.addHandler(file_handler)
+    except (PermissionError, OSError):
+        # Skip file logging if we can't write to the log file
+        pass
 
     console_handler = logging.StreamHandler()
     console_handler.setLevel(config.console_log_level)
