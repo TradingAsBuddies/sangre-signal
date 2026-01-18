@@ -8,7 +8,6 @@ import logging
 from typing import Optional, List
 import requests
 from bs4 import BeautifulSoup
-import yfinance as yf
 
 from ..config import NETWORK_CONFIG
 from ..cache import get_cache
@@ -84,7 +83,7 @@ def is_adr_finviz(ticker: str) -> Optional[bool]:
 
 
 def get_directors(ticker: str, max_count: int = 10) -> List[str]:
-    """Get key executives and directors from yfinance API.
+    """Get key executives and directors by scraping Yahoo Finance profile page.
 
     Args:
         ticker: Stock ticker symbol (e.g., 'AAPL')
@@ -102,33 +101,51 @@ def get_directors(ticker: str, max_count: int = 10) -> List[str]:
         # Apply max_count limit to cached result
         return cached_directors[:max_count] if cached_directors else []
 
-    try:
-        logger.info(f"Fetching directors for {ticker} via yfinance API")
-        stock = yf.Ticker(ticker)
-        info = stock.info
+    url = f"https://finance.yahoo.com/quote/{ticker}/profile"
+    headers = {"User-Agent": NETWORK_CONFIG.user_agent}
 
-        # Get company officers from yfinance
-        officers = info.get("companyOfficers", [])
-        if not officers:
-            logger.debug(f"No company officers found for {ticker}")
-            cache.set_directors(ticker, [])
+    try:
+        logger.info(f"Fetching directors for {ticker} from Yahoo Finance profile")
+        resp = requests.get(
+            url,
+            headers=headers,
+            timeout=NETWORK_CONFIG.request_timeout
+        )
+
+        if resp.status_code != 200:
+            logger.warning(f"Yahoo Finance profile returned status {resp.status_code} for {ticker}")
             return []
 
-        # Extract directors (those with "director" in title)
+        soup = BeautifulSoup(resp.text, "lxml")
+
+        # Find the Key Executives section
         directors = []
-        for officer in officers:
-            name = officer.get("name", "")
-            title = officer.get("title", "")
 
-            if not name or not title:
-                continue
-
-            # Only include entries with "director" in the title
-            if "director" in title.lower():
-                directors.append(f"{name} - {title}")
-
-            if len(directors) >= max_count:
+        # Look for table with executives
+        # Try finding section header first
+        exec_heading = None
+        for heading in soup.find_all(["h2", "h3"]):
+            if "key executives" in heading.get_text().lower():
+                exec_heading = heading
                 break
+
+        if exec_heading:
+            # Find the table after the heading
+            table = exec_heading.find_next("table")
+            if table:
+                rows = table.find_all("tr")
+                for row in rows:
+                    cells = row.find_all("td")
+                    if len(cells) >= 2:
+                        name = cells[0].get_text(strip=True)
+                        title = cells[1].get_text(strip=True)
+
+                        # Filter for directors only
+                        if name and title and "director" in title.lower():
+                            directors.append(f"{name} - {title}")
+
+                        if len(directors) >= max_count:
+                            break
 
         logger.info(f"Found {len(directors)} director(s) for {ticker}")
 
@@ -137,8 +154,11 @@ def get_directors(ticker: str, max_count: int = 10) -> List[str]:
 
         return directors
 
+    except requests.RequestException as e:
+        logger.warning(f"Network error fetching directors for {ticker}: {e}")
+        return []
     except Exception as e:
-        logger.warning(f"Error fetching directors for {ticker}: {e}")
+        logger.warning(f"Error parsing directors for {ticker}: {e}")
         return []
 
 

@@ -7,10 +7,7 @@ including fetching stock information, cash flow data, and split history.
 import logging
 import datetime
 import numbers
-import time
-import random
-from typing import Optional, Callable, TypeVar
-from functools import wraps
+from typing import Optional
 import yfinance as yf
 
 from ..models import StockInfo
@@ -19,144 +16,15 @@ from ..cache import get_cache
 
 logger = logging.getLogger("sangre_signal.fetchers.yahoo_finance")
 
-T = TypeVar('T')
-
-
-def retry_with_backoff(
-    max_retries: int = 3,
-    base_delay: float = 1.0,
-    max_delay: float = 30.0,
-    backoff_factor: float = 2.0
-) -> Callable:
-    """Decorator for retrying functions with exponential backoff.
-
-    Handles rate limiting (429) and transient errors by retrying with
-    increasing delays between attempts.
-
-    Args:
-        max_retries: Maximum number of retry attempts
-        base_delay: Initial delay in seconds
-        max_delay: Maximum delay between retries
-        backoff_factor: Multiplier for delay after each retry
-    """
-    def decorator(func: Callable[..., T]) -> Callable[..., T]:
-        @wraps(func)
-        def wrapper(*args, **kwargs) -> T:
-            last_exception = None
-
-            for attempt in range(max_retries + 1):
-                try:
-                    return func(*args, **kwargs)
-                except Exception as e:
-                    last_exception = e
-                    error_str = str(e).lower()
-
-                    # Check if it's a rate limit error
-                    is_rate_limit = (
-                        "429" in error_str or
-                        "too many requests" in error_str or
-                        "rate limit" in error_str
-                    )
-
-                    # Check if it's a transient error worth retrying
-                    is_transient = (
-                        is_rate_limit or
-                        "timeout" in error_str or
-                        "connection" in error_str or
-                        "temporary" in error_str
-                    )
-
-                    if attempt < max_retries and is_transient:
-                        # Calculate delay with jitter
-                        delay = min(
-                            base_delay * (backoff_factor ** attempt),
-                            max_delay
-                        )
-                        # Add random jitter (0-25% of delay)
-                        jitter = delay * random.uniform(0, 0.25)
-                        total_delay = delay + jitter
-
-                        logger.warning(
-                            f"Attempt {attempt + 1}/{max_retries + 1} failed for "
-                            f"{func.__name__}: {e}. Retrying in {total_delay:.1f}s..."
-                        )
-                        time.sleep(total_delay)
-                    else:
-                        # Not retryable or out of retries
-                        break
-
-            # Re-raise the last exception
-            raise last_exception
-
-        return wrapper
-    return decorator
-
-
-class RateLimitExceeded(Exception):
-    """Exception raised when rate limit is exceeded."""
-    def __init__(self, reset_time: float = None):
-        self.reset_time = reset_time
-        if reset_time:
-            super().__init__(f"Rate limit exceeded. Resets in {reset_time:.0f} seconds.")
-        else:
-            super().__init__("Rate limit exceeded.")
-
-
-@retry_with_backoff(max_retries=3, base_delay=2.0, max_delay=30.0)
-def _fetch_ticker_info(ticker: str) -> dict:
-    """Internal function to fetch ticker info with retry logic.
-
-    Args:
-        ticker: Stock ticker symbol
-
-    Returns:
-        Tuple of (info dict, yfinance Ticker object)
-
-    Raises:
-        RateLimitExceeded: When local rate limit is exceeded
-        Exception: On failure after retries
-    """
-    cache = get_cache()
-
-    # Check local rate limit before making request
-    if cache.is_rate_limited():
-        reset_time = cache.get_rate_limit_reset_time()
-        raise RateLimitExceeded(reset_time)
-
-    # Record the request
-    cache.record_request()
-
-    # Add a small delay to be respectful to the API
-    time.sleep(0.3)
-
-    stock = yf.Ticker(ticker)
-    info = stock.info
-
-    # Check for empty or error responses
-    if not info or len(info) == 0:
-        raise ValueError(f"No data returned for ticker {ticker}")
-
-    # Check for rate limit indicators in the response
-    if info.get("error"):
-        raise Exception(f"Yahoo Finance error: {info.get('error')}")
-
-    return info, stock
-
 
 def fetch_stock_info(ticker: str) -> Optional[StockInfo]:
     """Fetch comprehensive stock information from Yahoo Finance.
-
-    Includes automatic retry with exponential backoff for rate limiting
-    and transient errors.
 
     Args:
         ticker: Stock ticker symbol (e.g., 'AAPL')
 
     Returns:
         StockInfo object with all available data, or None if fetch fails.
-
-    Raises:
-        None - errors are logged and None is returned.
     """
     ticker = ticker.upper()
     cache = get_cache()
@@ -169,7 +37,12 @@ def fetch_stock_info(ticker: str) -> Optional[StockInfo]:
 
     try:
         logger.info(f"Fetching stock info for {ticker}")
-        info, stock = _fetch_ticker_info(ticker)
+        stock = yf.Ticker(ticker)
+        info = stock.info
+
+        if not info or len(info) == 0:
+            logger.error(f"No data returned for ticker {ticker}")
+            return None
 
         # Get operating cash flow
         op_cash_flow = get_operating_cash_flow(stock)
@@ -223,21 +96,8 @@ def fetch_stock_info(ticker: str) -> Optional[StockInfo]:
 
         return stock_info
 
-    except RateLimitExceeded as e:
-        logger.error(
-            f"Local rate limit exceeded for {ticker}. {e}"
-        )
-        return None
-
     except Exception as e:
-        error_str = str(e).lower()
-        if "429" in error_str or "too many requests" in error_str:
-            logger.error(
-                f"Rate limited by Yahoo Finance for {ticker}. "
-                "Try again in a few minutes or reduce request frequency."
-            )
-        else:
-            logger.error(f"Error fetching stock info for {ticker}: {e}")
+        logger.error(f"Error fetching stock info for {ticker}: {e}")
         return None
 
 
@@ -388,33 +248,8 @@ def get_last_split_details(ticker_obj: yf.Ticker, info: dict) -> str:
     return ""
 
 
-@retry_with_backoff(max_retries=2, base_delay=1.0, max_delay=10.0)
-def _fetch_vix_info() -> dict:
-    """Internal function to fetch VIX info with retry logic."""
-    cache = get_cache()
-
-    # Check local rate limit before making request
-    if cache.is_rate_limited():
-        reset_time = cache.get_rate_limit_reset_time()
-        raise RateLimitExceeded(reset_time)
-
-    # Record the request
-    cache.record_request()
-
-    # Add a small delay
-    time.sleep(0.3)
-
-    vix = yf.Ticker("^VIX")
-    info = vix.info
-    if not info:
-        raise ValueError("No VIX data returned")
-    return info
-
-
 def fetch_vix() -> Optional[float]:
     """Fetch the current VIX (CBOE Volatility Index) value.
-
-    Includes automatic retry with exponential backoff for rate limiting.
 
     Returns:
         Current VIX value, or None if fetch fails.
@@ -429,7 +264,12 @@ def fetch_vix() -> Optional[float]:
 
     try:
         logger.info("Fetching VIX index")
-        info = _fetch_vix_info()
+        vix = yf.Ticker("^VIX")
+        info = vix.info
+
+        if not info:
+            logger.warning("No VIX data returned")
+            return None
 
         price = info.get("regularMarketPrice") or info.get("price")
 
@@ -442,9 +282,5 @@ def fetch_vix() -> Optional[float]:
         return price
 
     except Exception as e:
-        error_str = str(e).lower()
-        if "429" in error_str or "too many requests" in error_str:
-            logger.warning("Rate limited fetching VIX, skipping")
-        else:
-            logger.warning(f"Error fetching VIX: {e}")
+        logger.warning(f"Error fetching VIX: {e}")
         return None
