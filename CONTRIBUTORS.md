@@ -13,6 +13,11 @@ This project is a community effort, and all contributions are appreciated.
 - Initial project design, architecture, and implementation – David Duncan
 - Contributing guidelines, packaging, and deployment setup – David Duncan
 
+## Original Inspiration
+
+- **MaxedOut** (Rural Indiana)
+  Built the original script that served as the inspiration for this project.
+
 ## How to Get Added
 
 If you have contributed code, documentation, testing, or ideas and would like to be
