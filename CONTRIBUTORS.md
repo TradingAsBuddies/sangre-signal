@@ -15,7 +15,7 @@ This project is a community effort, and all contributions are appreciated.
 
 ## Original Inspiration
 
-- **Maxed Out** (Rural Indiana)
+- **MaxedOut** (Rural Indiana)
   Built the original script that served as the inspiration for this project.
 
 ## How to Get Added
