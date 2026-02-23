@@ -337,6 +337,23 @@ class ClaudeFormatter(BaseFormatter):
             ]
         )
 
+        # Log API usage (best-effort)
+        try:
+            from falcon_core.backtesting.advisor import CostTracker
+            from falcon_core.db_manager import get_db_manager
+            _db = get_db_manager()
+            _tracker = CostTracker(_db)
+            _tracker.record_usage(
+                strategy_name=None,
+                service='signal_formatter',
+                model=message.model,
+                input_tokens=message.usage.input_tokens,
+                output_tokens=message.usage.output_tokens,
+                request_type='format_signal',
+            )
+        except Exception:
+            pass
+
         # Strip emojis and handle Windows console encoding
         text = _strip_emojis(message.content[0].text)
         return _safe_encode_for_console(text)
