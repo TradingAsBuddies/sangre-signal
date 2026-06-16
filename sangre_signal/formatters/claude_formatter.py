@@ -107,9 +107,9 @@ IMPORTANT: Do not use emojis in your response - use plain text only.""",
 
     "es": """Eres un analista financiero que proporciona evaluaciones claras y concisas de riesgos de acciones para inversionistas particulares.
 Tu rol es explicar datos financieros complejos en un lenguaje sencillo que cualquier persona pueda entender.
-Usa espanol mexicano (como se habla en la region de Oaxaca, Mexico) - amable, directo y accesible.
-Concentrate en informacion practica y explicaciones claras de los factores de riesgo.
-Se directo pero no alarmista - presenta los hechos de manera objetiva.
+Usa español mexicano (como se habla en la región de Oaxaca, México) - amable, directo y accesible.
+Concéntrate en información práctica y explicaciones claras de los factores de riesgo.
+Sé directo pero no alarmista - presenta los hechos de manera objetiva.
 IMPORTANTE: No uses emojis en tu respuesta - usa solo texto plano."""
 }
 
@@ -150,42 +150,42 @@ Please provide:
 
 Format the response with clear headers and bullet points for readability.""",
 
-    "es": """Analiza esta accion y proporciona un resumen bien formateado con evaluacion de riesgos en lenguaje sencillo.
-Usa espanol mexicano (como se habla en Oaxaca, Mexico) - claro, amable y accesible.
+    "es": """Analiza esta acción y proporciona un resumen bien formateado con evaluación de riesgos en lenguaje sencillo.
+Usa español mexicano (como se habla en Oaxaca, México) - claro, amable y accesible.
 
-Datos de la Accion:
-- Simbolo: {ticker}
+Datos de la Acción:
+- Símbolo: {ticker}
 - Empresa: {company_name}
 - Bolsa: {exchange}
-- Pais: {country}
+- País: {country}
 - Sede: {headquarters}
 - Es ADR: {is_adr}
-- Capitalizacion de Mercado: {market_cap}
+- Capitalización de Mercado: {market_cap}
 - Precio Actual: {price}
-- Maximo 52 Semanas: {week_52_high}
-- Minimo 52 Semanas: {week_52_low}
-- % Debajo del Maximo 52S: {pct_off_high}
-- Acciones en Circulacion Libre: {float_shares}
+- Máximo 52 Semanas: {week_52_high}
+- Mínimo 52 Semanas: {week_52_low}
+- % Debajo del Máximo 52S: {pct_off_high}
+- Acciones en Circulación Libre: {float_shares}
 - % Corto del Float: {short_pct}
 - Propiedad de Insiders: {insider_own}
 - Propiedad Institucional: {inst_own}
 - Deuda Total: {debt}
-- Indice VIX: {vix}
+- Índice VIX: {vix}
 
-Senales de Riesgo Detectadas:
+Señales de Riesgo Detectadas:
 {risk_flags}
 
 Por favor proporciona:
-1. Una breve descripcion de la empresa (1-2 oraciones)
-2. Seccion de EVALUACION DE RIESGO con una calificacion general clara (BAJO/MEDIO/ALTO) y explicacion
-3. Para cada senal de riesgo detectada, explica en lenguaje sencillo:
-   - Que significa para un inversionista
-   - Por que es importante
-   - Impacto potencial en la inversion
-4. Resumen de METRICAS CLAVE destacando numeros importantes
-5. CONCLUSION: Un resumen claro y practico
+1. Una breve descripción de la empresa (1-2 oraciones)
+2. Sección de EVALUACIÓN DE RIESGO con una calificación general clara (BAJO/MEDIO/ALTO) y explicación
+3. Para cada señal de riesgo detectada, explica en lenguaje sencillo:
+   - Qué significa para un inversionista
+   - Por qué es importante
+   - Impacto potencial en la inversión
+4. Resumen de MÉTRICAS CLAVE destacando números importantes
+5. CONCLUSIÓN: Un resumen claro y práctico
 
-Formatea la respuesta con encabezados claros y vinetas para facilitar la lectura."""
+Formatea la respuesta con encabezados claros y viñetas para facilitar la lectura."""
 }
 
 BATCH_PROMPTS = {
@@ -203,20 +203,20 @@ Please provide:
 
 Keep the analysis concise but comprehensive.""",
 
-    "es": """Analiza este portafolio de acciones y proporciona una evaluacion de riesgo consolidada.
-Usa espanol mexicano (como se habla en Oaxaca, Mexico) - claro, amable y accesible.
+    "es": """Analiza este portafolio de acciones y proporciona una evaluación de riesgo consolidada.
+Usa español mexicano (como se habla en Oaxaca, México) - claro, amable y accesible.
 
 Acciones del Portafolio:
 {stocks_summary}
 
 Por favor proporciona:
 1. RESUMEN DEL PORTAFOLIO: Breve resumen de las acciones analizadas
-2. DISTRIBUCION DE RIESGO: Cuantas acciones caen en categorias de riesgo BAJO/MEDIO/ALTO
+2. DISTRIBUCIÓN DE RIESGO: Cuántas acciones caen en categorías de riesgo BAJO/MEDIO/ALTO
 3. FACTORES DE RIESGO COMUNES: Patrones en el portafolio
-4. DESTACADOS INDIVIDUALES: Preocupaciones clave para cada accion (breve)
+4. DESTACADOS INDIVIDUALES: Preocupaciones clave para cada acción (breve)
 5. RECOMENDACIONES: Observaciones generales de riesgo del portafolio
 
-Manten el analisis conciso pero completo."""
+Mantén el análisis conciso pero completo."""
 }
 
 
@@ -279,7 +279,7 @@ class ClaudeFormatter(BaseFormatter):
         """Build a text representation of risk flags."""
         if not risk_analysis.has_risks:
             if self.language == "es":
-                return "No se detectaron senales de riesgo significativas."
+                return "No se detectaron señales de riesgo significativas."
             return "No significant risk flags detected."
 
         flags_text = []
@@ -372,14 +372,14 @@ class ClaudeFormatter(BaseFormatter):
 
         if self.language == "es":
             lines.append(divider)
-            lines.append(f"  ANALISIS DE {stock_info.ticker}  ")
+            lines.append(f"  ANÁLISIS DE {stock_info.ticker}  ")
             lines.append(divider)
-            lines.append(f"\n[Nota: Analisis de IA no disponible - {error}]")
+            lines.append(f"\n[Nota: Análisis de IA no disponible - {error}]")
             lines.append(f"\nEmpresa: {stock_info.get_display_name() or 'Desconocido'}")
             lines.append(f"Bolsa: {stock_info.exchange or 'Desconocido'}")
-            lines.append(f"Pais: {stock_info.get_country() or 'Desconocido'}")
+            lines.append(f"País: {stock_info.get_country() or 'Desconocido'}")
             lines.append(f"Precio: {_format_number(stock_info.regular_market_price)}")
-            lines.append(f"\nSENALES DE RIESGO:")
+            lines.append(f"\nSEÑALES DE RIESGO:")
             lines.append(self._build_risk_flags_text(risk_analysis))
         else:
             lines.append(divider)
@@ -431,7 +431,7 @@ class ClaudeFormatter(BaseFormatter):
             timestamp = datetime.now(est).strftime("%Y-%m-%d %H:%M:%S %Z")
 
             if self.language == "es":
-                header = f"{divider}\n  ANALISIS DE {stock_info.ticker} (Potenciado por Claude AI)  \n{divider}"
+                header = f"{divider}\n  ANÁLISIS DE {stock_info.ticker} (Potenciado por Claude AI)  \n{divider}"
                 footer = f"\n{divider}\nGenerado: {timestamp}\n{divider}"
             else:
                 header = f"{divider}\n  {stock_info.ticker} ANALYSIS (Powered by Claude AI)  \n{divider}"
