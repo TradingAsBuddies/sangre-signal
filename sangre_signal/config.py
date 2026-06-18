@@ -210,13 +210,14 @@ class ClaudeConfig:
     """Claude AI integration configuration.
 
     Attributes:
-        api_key: Anthropic API key (loaded from ANTHROPIC_API_KEY env var or .env file)
+        api_key: Anthropic API key (ANTHROPIC_API_KEY preferred, falls back to
+            CLAUDE_API_KEY — the name the rest of the Falcon stack uses — or .env file)
         model: Claude model to use for analysis
         max_tokens: Maximum tokens for response
         language: Output language ("en" for English, "es" for Spanish)
     """
-    api_key: str = field(default_factory=lambda: os.environ.get("ANTHROPIC_API_KEY", ""))
-    model: str = "claude-sonnet-4-20250514"
+    api_key: str = field(default_factory=lambda: os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("CLAUDE_API_KEY", ""))
+    model: str = "claude-sonnet-4-6"
     max_tokens: int = 2000
     language: Literal["en", "es"] = "en"
 
