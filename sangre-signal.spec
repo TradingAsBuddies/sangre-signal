@@ -1,5 +1,5 @@
 Name:           sangre-signal
-Version:        2.0.0
+Version:        2.5.0
 Release:        1%{?dist}
 Summary:        Advanced stock analysis tool with Claude AI-powered risk explanations
 
@@ -20,6 +20,7 @@ Requires:       python3-beautifulsoup4 >= 4.12.0
 Requires:       python3-lxml >= 4.9.0
 Requires:       python3-tzdata >= 2023.3
 Requires:       python3-anthropic >= 0.40.0
+Requires:       python3-openai >= 1.0.0
 
 %description
 Sangre Signal is a comprehensive stock analysis application that analyzes
