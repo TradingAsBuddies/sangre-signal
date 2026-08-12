@@ -267,7 +267,12 @@ class ClaudeFormatter(BaseFormatter):
         if self._client is None:
             try:
                 import anthropic
-                self._client = anthropic.Anthropic(api_key=self.config.api_key)
+                # base_url only when explicitly configured; otherwise the SDK's
+                # own resolution (ANTHROPIC_BASE_URL env or api.anthropic.com)
+                kwargs = {"api_key": self.config.api_key}
+                if self.config.base_url:
+                    kwargs["base_url"] = self.config.base_url
+                self._client = anthropic.Anthropic(**kwargs)
             except ImportError:
                 raise ImportError(
                     "The 'anthropic' package is required for Claude formatting. "
@@ -434,7 +439,7 @@ class ClaudeFormatter(BaseFormatter):
                 header = f"{divider}\n  ANÁLISIS DE {stock_info.ticker} (Potenciado por Claude AI)  \n{divider}"
                 footer = f"\n{divider}\nGenerado: {timestamp}\n{divider}"
             else:
-                header = f"{divider}\n  {stock_info.ticker} ANALYSIS (Powered by Claude AI)  \n{divider}"
+                header = f"{divider}\n  {stock_info.ticker} ANALYSIS (AI: {self.config.model})  \n{divider}"
                 footer = f"\n{divider}\nGenerated: {timestamp}\n{divider}"
 
             return _safe_encode_for_console(f"{header}\n\n{analysis}{footer}")
