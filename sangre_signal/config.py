@@ -244,7 +244,12 @@ class PerplexityConfig:
     """
     api_key: str = field(default_factory=lambda: os.environ.get("PERPLEXITY_API_KEY", ""))
     model: str = field(default_factory=lambda: os.environ.get("SANGRE_PERPLEXITY_MODEL", "sonar-pro"))
-    base_url: str = field(default_factory=lambda: os.environ.get("PERPLEXITY_BASE_URL", "https://api.perplexity.ai"))
+    # The "Perplexity" formatter is an OpenAI-protocol client; the base URL may
+    # point at ANY OpenAI-compatible server (Perplexity, llama.cpp, vLLM, ...).
+    # SANGRE_OPENAI_COMPAT_BASE_URL is the clear name; PERPLEXITY_BASE_URL is
+    # accepted as an alias.
+    base_url: str = field(default_factory=lambda: os.environ.get("SANGRE_OPENAI_COMPAT_BASE_URL")
+                          or os.environ.get("PERPLEXITY_BASE_URL", "https://api.perplexity.ai"))
     max_tokens: int = 2000
     language: Literal["en", "es"] = "en"
 
