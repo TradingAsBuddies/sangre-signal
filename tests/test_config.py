@@ -138,3 +138,17 @@ class TestEncodingFallbackIntegration:
             success = False
 
         assert success, f"horizontal_line '{config.horizontal_line}' cannot be encoded in {encoding}"
+
+
+class TestAnthropicWorkspaceId:
+    """ANTHROPIC_WORKSPACE_ID is only required for identity-linked API keys."""
+
+    def test_workspace_id_defaults_to_empty(self, monkeypatch):
+        monkeypatch.delenv("ANTHROPIC_WORKSPACE_ID", raising=False)
+        from sangre_signal.config import ClaudeConfig
+        assert ClaudeConfig().workspace_id == ""
+
+    def test_workspace_id_read_from_env(self, monkeypatch):
+        monkeypatch.setenv("ANTHROPIC_WORKSPACE_ID", "wrkspc_test123")
+        from sangre_signal.config import ClaudeConfig
+        assert ClaudeConfig().workspace_id == "wrkspc_test123"

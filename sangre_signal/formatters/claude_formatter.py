@@ -267,7 +267,18 @@ class ClaudeFormatter(BaseFormatter):
         if self._client is None:
             try:
                 import anthropic
-                self._client = anthropic.Anthropic(api_key=self.config.api_key)
+                # An identity-linked key is scoped to a user, not a workspace, so the
+                # API cannot infer which workspace the request acts in and rejects it
+                # with a 400 unless anthropic-workspace-id is sent. Workspace-scoped
+                # keys carry that implicitly, so the header is omitted when unset.
+                workspace_id = getattr(self.config, "workspace_id", "")
+                if workspace_id:
+                    self._client = anthropic.Anthropic(
+                        api_key=self.config.api_key,
+                        default_headers={"anthropic-workspace-id": workspace_id},
+                    )
+                else:
+                    self._client = anthropic.Anthropic(api_key=self.config.api_key)
             except ImportError:
                 raise ImportError(
                     "The 'anthropic' package is required for Claude formatting. "

@@ -215,8 +215,17 @@ class ClaudeConfig:
         model: Claude model to use for analysis
         max_tokens: Maximum tokens for response
         language: Output language ("en" for English, "es" for Spanish)
+        workspace_id: Anthropic workspace id (ANTHROPIC_WORKSPACE_ID). Required only
+            for identity-linked API keys, which are scoped to a user rather than a
+            workspace and so cannot infer which workspace a request acts in. The API
+            rejects those keys with:
+                400 invalid_request_error — "anthropic-workspace-id is required when
+                authenticating with an identity-linked API key"
+            Leave unset for ordinary workspace-scoped keys; the header is then omitted
+            and behaviour is unchanged.
     """
     api_key: str = field(default_factory=lambda: os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("CLAUDE_API_KEY", ""))
+    workspace_id: str = field(default_factory=lambda: os.environ.get("ANTHROPIC_WORKSPACE_ID", ""))
     model: str = "claude-sonnet-4-6"
     max_tokens: int = 2000
     language: Literal["en", "es"] = "en"
