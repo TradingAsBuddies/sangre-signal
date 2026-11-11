@@ -257,7 +257,7 @@ class PerplexityFormatter(BaseFormatter):
                 from openai import OpenAI
                 self._client = OpenAI(
                     api_key=self.config.api_key,
-                    base_url="https://api.perplexity.ai"
+                    base_url=self.config.base_url
                 )
             except ImportError:
                 raise ImportError(
